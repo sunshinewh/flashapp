@@ -1,0 +1,21 @@
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+use flashcard_db
+db.cards.find()
+show collections
+db.collectionName.find()
+use flashcard_db
+db.collectionName.find()
+show dbs
+show db

@@ -1,0 +1,155 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<body>
+
+
+<center>
+    <div class="image-container mt-5">
+        <img id="front_image" src="/static/{{ card.image_path_front }}" alt="Image for {{ card.word }}" style="display: block;"> 
+        <img id="back_image" src="/static/cards/{{ card.primary_image }}" alt="Image for {{ card.word }}" style="display: none;"> 
+        <div class="buttons-overlay">
+                    <button id="flip_button" type="button" class="btn btn-dark btn-lg bigger-button">Check Answer</button>
+                    <button id="correct_button" type="button" class="btn btn-success btn-lg bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Correct</button>
+                    <button id="next_button" type="button" class="btn btn-danger btn-dark bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Next</button>
+            
+            
+        </div>
+
+    </div>
+    <div class="buttons-overlay2">
+        <audio id="myAudio">
+            <source src="/static/cards/{{ card.phraseaudio }}" type="audio/mpeg">
+        </audio>
+        
+        <button id="flip_button" type="button" class="btn btn-dark btn-lg bigger-button2">Edit</button>
+        <button id="speakButton" type="button" onclick="playAudio()" class="btn btn-primary btn-sm">Speak</button>
+            </div>
+</center>
+
+<div class="container mt-5 mb-3">
+    <div class="row d-flex justify-content-center">
+
+        <div class="col-sm-6 center-align">
+            <div class="card p-3 mb-2">
+
+                <div class="mt-5">
+                    <h3 class="heading">{{ card.word }}</h3>
+                    <div class="mt-5">
+                        <p>{{ card.sentence }}</p>
+                    </div>
+                    <div class="mt-5">
+                        <button id="show_hide" type="button" onClick="showMeaning();" class="btn btn-dark">S H O W</button>
+                    </div>
+                    <div class="mt-5" id="meaning_hidden" style="display:block;">
+                        <p>XXXXXXXXXX</p>
+                    </div>
+                    <div class="mt-5" id="meaning" style="display:none;">
+                        <p>{{ card.meaning }}</p>
+                    </div>
+                    <div class="mt-5">
+                        <a href="{% url 'card' deck_name=card.deck word=next_word %}">NEXT &#8594;</a>
+                    </div>
+                    <div class="mt-5">
+                        <div class="mt-3"> <span id="reviewed">reviewed {{ card.reviewed }} times</span> </div>
+                        {% if next_session %}
+                        <p>Upcoming Deadline: {{ next_session }}</p>
+                        { % else %}
+                        <p>All sessions completed.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+
+<script>
+    function playAudio() {
+        var x = document.getElementById("myAudio"); 
+        x.play(); 
+    }
+</script>
+
+<script type="text/javascript">
+
+
+        document.getElementById('correct_button').addEventListener('click', function() {
+            window.location.href = this.getAttribute('data-next-url');
+        });
+    
+        document.getElementById('next_button').addEventListener('click', function() {
+            window.location.href = this.getAttribute('data-next-url');
+        });
+        
+    // Script to toggle the images on button click
+    document.getElementById('flip_button').addEventListener('click', function() {
+        var frontImage = document.getElementById('front_image');
+        var backImage = document.getElementById('back_image');
+        
+        // Toggles the display of the front and back images
+        if (frontImage.style.display === "none") {
+            frontImage.style.display = "block";
+            backImage.style.display = "none";
+        } else {
+            frontImage.style.display = "none";
+            backImage.style.display = "block";
+        }
+    });
+    
+</script>
+</body>
+<style>
+.buttons-overlay {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.buttons-overlay2 {
+    position: absolute;
+    top: 1187px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.bigger-button {
+        font-size: 20px; /* Larger font size */
+        padding: 20px 80px; /* Larger padding */
+    }
+.bigger-button2 {
+        font-size: 20px; /* Larger font size */
+        padding: 10px 80px; /* Larger padding */
+    }
+
+
+    .flip-image-front {
+        animation: flipToFront 0.6s forwards;
+    }
+
+    .flip-image-back {
+        animation: flipToBack 0.6s forwards;
+    }
+
+    @keyframes flipToFront {
+        from { transform: rotateY(180deg); }
+        to { transform: rotateY(0deg); }
+    }
+
+    @keyframes flipToBack {
+        from { transform: rotateY(0deg); }
+        to { transform: rotateY(180deg); }
+    }
+
+</style>
+{% endblock %}

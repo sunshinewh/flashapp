@@ -1,0 +1,86 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<style>
+    .custom-thumbnail {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover; /* Ensures the image covers the area without stretching */
+    }
+</style>
+
+<body>
+
+<div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == 'info' %}
+    <div class="row info_msg">
+      <div class="col">{{ message }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
+
+<div class="container wrapper d-flex justify-content-left" style="margin-top:1%;">
+    <div class="p-4">
+        <h2 style="background-color:#a09ea5;">Upload a new deck:</h2>
+        <hr>
+        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+            <input type="file" name="csv_file" accept=".csv">
+            <button type="submit" class="btn btn-success">Add Deck</button>
+        </form>
+        <h2 style="background-color:#a09ea5; margin-top:40px;">Decks:</h2>
+        <hr>
+
+        {% if decks %}
+        {% for item in decks %}
+            {% with deck_name=item.0 deck_info=item.1 %}
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <!-- Display deck name and card count -->
+                        <h1>{{ deck_name }} ({{ deck_info.count }} cards)</h1>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-between">
+                        <!-- Sample Card Thumbnails with links -->
+                        <div class="d-flex">
+                            {% for card in deck_info.sample_cards %}
+                                <div>
+                                    <!-- Link to the card's review page -->
+                                    <a href="{% url 'card' deck_name=deck_name word=card.word %}">
+                                        <img src="/static/cards/{{ card.primary_image }}" alt="{{ card.word }}" class="img-thumbnail custom-thumbnail mr-2">
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Dropdown Menu -->
+                        <div>
+                            <form action="{% url 'deck' deck_name=deck_name %}" method="post">{% csrf_token %}
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-outline-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'card' deck_name=deck_name %}">Review</a>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item" type="submit">Delete</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+        {% else %}
+            <p>You have no decks yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+
+{% endblock %}

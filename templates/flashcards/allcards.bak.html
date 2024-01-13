@@ -1,0 +1,65 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<div class="container mt-10">
+    <h2>Card Chooser</h2>
+    <div class="row">
+        {% for card in cards %}
+        <div class="col-md-12">
+            <div class="thumbnail">
+                <a href="http://127.0.0.1:8000/{{ card.image_path }}" target="_blank">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+                        {% for image_path in card.image_paths %}
+                            <div style="flex-basis: calc(25% - 20px); margin-bottom: 20px;">
+                                <img src="http://127.0.0.1:8000/{{ image_path }}" alt="{{ card.word }}" style="width: 100%;">
+                                <button class="make-primary-btn" data-card-id="{{ card.id }}" data-image-path="{{ image_path }}">Make Primary</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="caption">
+                        <p>{{ card.word }}</p>
+                        <p>Deck: {{ card.deck }}</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No cards found.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.querySelectorAll('.make-primary-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const cardId = this.getAttribute('data-card-id');
+                const imagePath = this.getAttribute('data-image-path');
+
+                // AJAX request to Django view
+                fetch('/set-primary-image/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({cardId: cardId, imagePath: imagePath})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle response
+                    if(data.success) {
+                        alert('Primary image updated!');
+                    } else {
+                        alert('Error updating primary image.');
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

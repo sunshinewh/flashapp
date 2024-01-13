@@ -1,0 +1,77 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<body>
+
+  <div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == 'info' %}
+    <div class="row info_msg">
+      <div class="col">{{ message }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+ 
+
+  <div class="container wrapper d-flex justify-content-left" style="margin-top:5%;">
+    <div class="p-4">
+
+      <h2 style="background-color:#fffee6;">Decks:</h2>
+      <hr>
+    {% if decks %}
+        {% for deck_name, deck_info in decks %}
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-6">
+                    <!-- Display deck name and card count -->
+                    <h3>{{ deck_name }} ({{ deck_info.count }} cards)</h3>
+                </div>
+                <div class="col-md-6 d-flex justify-content-between">
+                    <div class="d-flex">
+                        <!-- Display sample cards -->
+                        {% for card in deck_info.sample_cards %}
+                            <div>
+                                <img src="{{ card.primary_image }}" alt="{{ card.word }}" class="img-thumbnail mr-2" style="width: 100px; height: 100px;">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Dropdown Menu -->
+                    <div>
+                        <form action="{% url 'deck' deck_name=deck_name %}" method="post">{% csrf_token %} 
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{% url 'card' deck_name=deck_name %}">Review</a>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item" type="submit">Delete</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No decks available.</p>
+    {% endif %}
+
+    <div style="margin-top:40%;">
+        <h2 style="background-color:#fffee6;">Upload a new deck:</h2>
+        <hr>
+        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+        <input type="file" name="csv_file" accept=".csv">
+        <button type="submit" class="btn btn-success">Add Deck</button>
+        </form>
+        </div>
+    
+        </div>
+    
+    
+    </body>
+    
+    {% endblock %}
