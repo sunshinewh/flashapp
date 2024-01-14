@@ -28,8 +28,8 @@ STRIPE_WEBHOOK_SECRET_TEST='whsec_12345..'
 PRODUCT_PRICE='price_12345...'
 
 MONGO_USER='user'
-MONGO_PASSWORD='password'
-MONGO_HOST='127.0.0.1'
+MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
+MONGO_HOST='cluster0.sirwuvv.mongodb.net'
 MONGO_DB='flashcard_db'
 MONGO_COLLECTION='cards'
 
@@ -107,11 +107,11 @@ AUTH_USER_MODEL = 'app_users.AppUser'
 # flashcard app
 
 # MONGO DB
-MONGO_USER='user'
-MONGO_PASSWORD='password'
-MONGO_HOST='127.0.0.1'
-MONGO_DB='flashcard_db'
-MONGO_COLLECTION='cards'    
+#MONGO_USER='user'
+#MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
+#MONGO_HOST='mongodb+srv://user:KJLhK8rwgYKYMpcGr6v4@cluster0.sirwuvv.mongodb.net'
+#MONGO_DB='flashcard_db'
+#MONGO_COLLECTION='cards'    
 
 
 # Password validation
