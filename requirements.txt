@@ -39,6 +39,7 @@ kombu==5.3.3
 numpy==1.26.2
 openai==1.2.4
 opencv-contrib-python==4.7.0.68
+opencv-python==4.9.0.80
 packaging==23.2
 param==2.0.1
 pathlib==1.0.1
