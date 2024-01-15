@@ -26,7 +26,7 @@ class AppUserManager(BaseUserManager):
         )
         user.username = username
         user.is_superuser = True
-        #user.is_staff = True  # You may also need to set is_staff to True
+        user.is_staff = True  # You may also need to set is_staff to True
         user.save(using=self._db)
         return user
 
