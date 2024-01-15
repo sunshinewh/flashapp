@@ -98,10 +98,15 @@ WSGI_APPLICATION = 'django_examples.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgres',
+        'NAME': 'dephaguq2mn933',
+        'USER': 'srkixmzithrred',
+        'PASSWORD': '66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29',
+        'HOST': 'ec2-54-234-13-16.compute-1.amazonaws.com'
+        'PORT': '5432'
     }
 }
+postgres://srkixmzithrred:66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29@ec2-54-234-13-16.compute-1.amazonaws.com:5432/dephaguq2mn933
 
 ## User model
 AUTH_USER_MODEL = 'app_users.AppUser'
