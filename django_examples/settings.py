@@ -39,7 +39,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 
 ## rabbitmq message broker for Celery
-CELERY_BROKER_URL = 'pyamqp://127.0.0.1:5672'
+#CELERY_BROKER_URL = 'pyamqp://127.0.0.1:5672'
 
 # Application definition
 

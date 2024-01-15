@@ -23,8 +23,8 @@ from flashcards import views as flashcard_views  # Import the views from flashca
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app_users.urls')),
-    path('', include('user_payment.urls')),
-    path('', include('edit_photo.urls')),
+    #path('', include('user_payment.urls')),
+    #path('', include('edit_photo.urls')),
     path('', include('flashcards.urls')),
     path('set-primary-image/', flashcard_views.set_primary_image, name='set-primary-image'),
 ]
