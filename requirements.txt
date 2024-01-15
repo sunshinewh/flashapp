@@ -45,6 +45,7 @@ Pillow==9.4.0
 prompt-toolkit==3.0.41
 protobuf==4.21.12
 psycopg2==2.9.9
+psycopg2-binary==2.9.9
 pycparser==2.21
 pydantic==2.5.0
 pydantic_core==2.14.1
