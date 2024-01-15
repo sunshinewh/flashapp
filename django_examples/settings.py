@@ -106,7 +106,6 @@ DATABASES = {
         'PORT': '5432'
     }
 }
-postgres://srkixmzithrred:66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29@ec2-54-234-13-16.compute-1.amazonaws.com:5432/dephaguq2mn933
 
 ## User model
 AUTH_USER_MODEL = 'app_users.AppUser'
