@@ -21,6 +21,7 @@ dj-database-url==2.1.0
 Django==4.1.4
 django-environ==0.11.2
 django-heroku==0.3.1
+django-on-heroku==1.1.2
 django-storages==1.13.2
 dnspython==2.4.2
 ffmpeg==1.4
