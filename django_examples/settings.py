@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'edit_photo.apps.EditPhotoConfig',
     'flashcards.apps.FlashcardsConfig',
     'whitenoise.runserver_nostatic',
+    'django_heroku',
+    'django_on_heroku',
 ]
 
 MIDDLEWARE = [
@@ -171,8 +173,8 @@ STORAGES = {
     },
 }
 
-import django_on_heroku
-django_on_heroku.settings(locals())
+import django-heroku
+django_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
