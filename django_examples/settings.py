@@ -36,7 +36,7 @@ MONGO_COLLECTION='cards'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/']
 
 ## rabbitmq message broker for Celery
 CELERY_BROKER_URL = 'pyamqp://127.0.0.1:5672'
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'user_payment.apps.UserPaymentConfig',
     'edit_photo.apps.EditPhotoConfig',
     'flashcards.apps.FlashcardsConfig',
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
@@ -169,8 +170,8 @@ STORAGES = {
     },
 }
 
-import dejango_heroku
-django_heroku.settings(locals())
+import django_on_heroku
+django_on_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
