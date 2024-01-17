@@ -65,7 +65,40 @@
     </div>
 </div>
 
-
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="word">Word</label>
+                            <input type="text" class="form-control" id="word" name="word" value="{{ card.word }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="approximation">Approximation</label>
+                            <input type="text" class="form-control" id="approximation" name="approximation" value="{{ card.approximation }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="sentenceeng">Sentence (English)</label>
+                            <input type="text" class="form-control" id="sentenceeng" name="sentenceeng" value="{{ card.sentenceeng }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="meaning">Meaning</label>
+                            <input type="text" class="form-control" id="meaning" name="meaning" value="{{ card.meaning }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="sentenceforeign">Sentence (Foreign)</label>
+                            <input type="text" class="form-control" id="sentenceforeign" name="sentenceforeign" value="{{ card.sentenceforeign }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
 
 <script>

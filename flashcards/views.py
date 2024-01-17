@@ -77,7 +77,9 @@ stability_api = client.StabilityInference(
     engine="stable-diffusion-xl-1024-v1-0",
 )
 
-def generate_image(text_string, filename_base):
+def generate_image(filename_base, text_string, style_preset, numimages):
+    print(f"Generated filename_base: {filename_base}")  # Debugging line
+    print(f"text_string: {text_string}")  # Debugging line
     static_path = []
     image_paths = []  # Initialize image_paths as an empty list
     ai_paths = []
@@ -93,11 +95,10 @@ def generate_image(text_string, filename_base):
         engine="stable-diffusion-xl-1024-v1-0",
     )
     
-
+    
     # Generate images
-    for i in range(4):
+    for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
-        print(filename)
         # First File Path - in the static directory
         static_path = os.path.join(settings.STATICFILES_DIRS[0], filename)
         static_path = static_path.replace('\\', '/')  # Normalize path for OS compatibility
@@ -112,11 +113,13 @@ def generate_image(text_string, filename_base):
         # Call the API to generate the image
         answers = stability_api.generate(
             prompt=text_string,
+            style_preset=style_preset,
             seed=random_number,  # Modify seed for each image for variability
             steps=50,
             cfg_scale=8.0,
-            width=832,
-            height=1152,
+            width=1152,
+            height=832,
+
             samples=1,  # If the API supports generating multiple images at once, set this to 4 and adjust the loop
             sampler=generation.SAMPLER_K_DPMPP_2M
         )
@@ -139,6 +142,84 @@ def generate_image(text_string, filename_base):
 
 def home(request):
 	return render(request, 'general/home.html')
+
+from django.shortcuts import render, redirect
+
+from bson import ObjectId
+
+from bson import ObjectId
+from django.shortcuts import redirect
+# Make sure you have the appropriate imports for other required modules and functions
+
+def generate_ai_images(request):
+    hdim = 1152
+    vdim = 832
+    FONTSIZE = 100
+    SHADOWWIDTH = 5
+    def get_text_dimensions(text_string, font):
+        ascent, descent = font.getmetrics()
+        width = font.getmask(text_string).getbbox()[2]
+        height = font.getmask(text_string).getbbox()[3] + descent 
+        return (width, height)
+        
+    line1 = -75
+    line2 =  75
+    line3 = 225
+    mongo_collection = mongo_handler()
+    FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    font = ImageFont.truetype(FONTNAME, FONTSIZE)
+    ipa_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    # Load fonts
+    regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
+    ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
+    font = ImageFont.truetype(regular_font_path, FONTSIZE)
+    line_spacing = 300  # Additional space between lines, adjust as needed
+
+    if request.method == 'POST':
+        text_string = request.POST.get('text_string')
+        card_id = request.POST.get('card_id')
+        numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
+        style_preset = request.POST.get('style_preset')
+        positive_prompt = request.POST.get('positive_prompt')
+        negative_prompt = request.POST.get('negative_prompt')
+        deck = request.POST.get('deck_name')
+        word = request.POST.get('word')
+        meaning = request.POST.get('meaning')
+        full_ipa = request.POST.get('full_ipa')
+        sentenceforeign = request.POST.get('sentenceforeign')
+        sentenceeng = request.POST.get('sentenceeng')
+        text_string = word
+        filebase = f"{deck}_{word}".replace(' ', '_')
+
+        try:
+            # Call generate_image with filebase and text_string
+            card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
+
+            # Initialize update_dict
+            update_dict = {}
+
+            # Update dictionary with new image paths
+            for i, path in enumerate(image_paths):
+                with Image.open(path) as card_write:
+                    write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                    write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)    
+                    card_write.save(path, 'JPEG')
+                    update_dict[f'image_path{i}'] = path
+
+            # Update the MongoDB document
+            mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
+
+        except Exception as e:
+            print(f"Error generating images: {e}")
+            # Handle error (e.g., display a message to the user)
+
+        return redirect('my_cards')  # Redirect back to the cards page
+
+    return redirect('home')  # Redirect to home if not a POST request
+
+
+
 
 @require_POST
 def set_primary_image_view(request):
@@ -181,19 +262,37 @@ def update_primary_image(request):
 
     return JsonResponse({'status': 'fail'}, status=400)
 
+from django.http import JsonResponse
+
 def my_cards(request):
     mongo_collection = mongo_handler()
+
+    # Handle POST request for updates
+    if request.method == 'POST':
+        data = request.POST
+        deck_name = data.get('deck_name')
+        updated_data = {
+            'word': data.get('word'),
+            'approximation': data.get('approximation'),
+            'sentenceeng': data.get('sentenceeng'),
+            'meaning': data.get('meaning'),
+            'sentenceforeign': data.get('sentenceforeign'),
+        }
+        mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': updated_data})
+        #return JsonResponse({'status': 'success', 'message': 'Card updated successfully'})
+        return redirect('my_cards')
+
+    # Handle GET request
     cards_data = mongo_collection.find({})
     cards = []
 
     for card in cards_data:
-        # Convert ObjectId to string and add as 'id'
         card['id'] = str(card['_id'])
-        # Create full image paths dynamically based on existing keys
         card['image_paths'] = [card[key] for key in card if key.startswith('image_path')]
         cards.append(card)
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
+
 
 def my_decks(request):
     mongo_collection = mongo_handler()
