@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django_heroku',
     'django_on_heroku',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -186,3 +187,14 @@ STRIPE_WEBHOOK_SECRET_TEST = os.getenv('STRIPE_WEBHOOK_SECRET_TEST')
 PRODUCT_PRICE = os.getenv('PRODUCT_PRICE')
 
 REDIRECT_DOMAIN = 'http://127.0.0.1:8000'
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 1,
+    'timeout': 10000000,
+    'retry': 100000000,
+    'queue_limit': 2,
+    'bulk': 10,
+    'orm': 'default',
+    'redis': os.getenv('REDIS_URL')  # Use Redis URL from the environment variable
+}

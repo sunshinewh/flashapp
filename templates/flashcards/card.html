@@ -9,14 +9,12 @@
 
 <center>
     <div class="image-container mt-5">
-        <img id="front_image" src="/static/{{ card.image_path_front }}" alt="Image for {{ card.word }}" style="display: block;"> 
+        <img id="front_image" src="/static/cards/{{ card.front_image }}" alt="Image for {{ card.word }}" style="display: block;"> 
         <img id="back_image" src="/static/cards/{{ card.primary_image }}" alt="Image for {{ card.word }}" style="display: none;"> 
         <div class="buttons-overlay">
-                    <button id="flip_button" type="button" class="btn btn-dark btn-lg bigger-button">Check Answer</button>
-                    <button id="correct_button" type="button" class="btn btn-success btn-lg bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Correct</button>
-                    <button id="next_button" type="button" class="btn btn-danger btn-dark bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Next</button>
-            
-            
+                    <button id="prev_button" type="button" class="btn btn-danger btn-dark bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=prev_word %}">Back</button>
+                    <button id="correct_button" type="button" class="btn btn-success btn-lg bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Correct</button>        
+                    <button id="next_button" type="button" class="btn btn-danger btn-dark bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Next</button>     
         </div>
 
     </div>
@@ -24,8 +22,7 @@
         <audio id="myAudio">
             <source src="/static/cards/{{ card.phraseaudio }}" type="audio/mpeg">
         </audio>
-        
-        <button id="flip_button" type="button" class="btn btn-dark btn-lg bigger-button2">Edit</button>
+        <button id="flip_button" type="button" class="btn btn-dark btn-sm bigger-button2">Toggle Front/Back</button>
         <button id="speakButton" type="button" onclick="playAudio()" class="btn btn-primary btn-sm">Speak</button>
             </div>
 </center>
@@ -88,6 +85,10 @@
         document.getElementById('next_button').addEventListener('click', function() {
             window.location.href = this.getAttribute('data-next-url');
         });
+
+        document.getElementById('prev_button').addEventListener('click', function() {
+            window.location.href = this.getAttribute('data-next-url');
+        });
         
     // Script to toggle the images on button click
     document.getElementById('flip_button').addEventListener('click', function() {
@@ -117,7 +118,7 @@
 
 .buttons-overlay2 {
     position: absolute;
-    top: 1187px;
+    top: 856px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;

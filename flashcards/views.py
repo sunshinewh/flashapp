@@ -34,7 +34,12 @@ from pydub import playback
 from openai import OpenAI
 from pydub import AudioSegment
 from datetime import datetime, timedelta
+from django_q.tasks import async_task
 
+hdim = 832
+vdim = 1152
+FONTSIZE = 70
+SHADOWWIDTH = 4
 
 def play_audio(file):
     sound = pydub.AudioSegment.from_file(file, format="mp3")
@@ -57,7 +62,7 @@ def write_image(size, message, font, fontColor, hoffset, image):
     _, _, w, h = draw.textbbox((0, 0), message, font=font)
     tw, th = get_text_dimensions(message, font)
     print("W:"+str(W)+" H:"+str(H)+" w: "+str(w)+" h: "+str(h)+" tw: "+str(tw)+" th: "+str(th))
-    draw.text((((W-tw)/2), ((H-th)/2)+hoffset), message, font=font, fill=fontColor, stroke_width=10, stroke_fill='white')
+    draw.text((((W-tw)/2), ((H-th)/2)+hoffset), message, font=font, fill=fontColor, stroke_width=SHADOWWIDTH, stroke_fill='white')
     #draw.text((((W-w)/2), ((H-h)/2)+125), TRADITIONAL_CHAR, font=font, fill=fontColor, stroke_width=10, stroke_fill='white')
     return image
 
@@ -249,7 +254,7 @@ def deck(request, deck_name=None):
         card_files = []
 
         # Setup paths for fonts
-        FONTSIZE = 100
+
         FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
         regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
         print(f"fontname{FONTNAME}")
@@ -267,10 +272,11 @@ def deck(request, deck_name=None):
         #font = ImageFont.truetype(regular_font_path, FONTSIZE)
         ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
         font = ImageFont.truetype(regular_font_path, FONTSIZE)
-        line_spacing = 150  # Additional space between lines, adjust as needed
+        line_spacing = 300  # Additional space between lines, adjust as needed
     
 
         for row in reader:
+            line_spacing = 200
             new_row = {key: value for key, value in row.items()}
             new_row['deck'] = deck_name
             new_row['reviewed'] = 0
@@ -279,9 +285,12 @@ def deck(request, deck_name=None):
             print(f"Word: {text_for_image}")
             print(f"image_filename: {image_filename}")
             
+
             # Create front and back images
-            front_img = Image.new('RGB', (832, 1152), 'maroon')
-            back_img = Image.new('RGB', (832, 1152), 'darkblue')
+            front_img = Image.new('RGB', (vdim, hdim), 'maroon')
+            back_img = Image.new('RGB', (vdim, hdim), 'darkblue')
+            #front_img = Image.new('RGB', (832, 1152), 'maroon')
+            #back_img = Image.new('RGB', (832, 1152), 'darkblue')
 
             # Gather all texts and corresponding fonts for front and back images
             front_texts = [new_row['word'], new_row['approximation'] + " [" + new_row['p_ipa'] + "]", new_row['sentenceeng']]
@@ -289,16 +298,22 @@ def deck(request, deck_name=None):
             print(f"front fonts {front_fonts}")
             back_texts = [new_row['meaning']+ " [" + new_row['full_ipa'] + "]", new_row['sentenceforeign']]
             back_fonts = [regular_font, ipa_font, regular_font]
+            
+            #line1 = -225
+            #line2 =  -75
+            #line3 = 75
 
+            line1 = -75
+            line2 =  75
+            line3 = 225
             # Write text to front image
-            write_image((832, 1152), new_row['word'], font, 'black', -225, front_img)
-            write_image((832, 1152), new_row['approximation'] + " [" + new_row['p_ipa'] + "]", font, 'black', -75, front_img)
-            write_image((832, 1152), new_row['sentenceeng'], font, 'black', 75, front_img)
+            write_image((vdim, hdim), new_row['word'], font, 'black', line1, front_img)
+            write_image((vdim, hdim), new_row['approximation'] + " [" + new_row['p_ipa'] + "]", font, 'black', line2, front_img)
+            write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
             # Write text to back image        
-            write_image((832, 1152), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', -225, back_img)
-            write_image((832, 1152), new_row['p_ipa'], font, 'black', -75, back_img)
-            write_image((832, 1152), new_row['sentenceforeign'], font, 'black', 75, back_img)
+            write_image((vdim, hdim), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', line2, back_img)
+            write_image((vdim, hdim), new_row['sentenceforeign'], font, 'black', line3, back_img)
             
             # Save images and construct relative paths
             front_image_path = os.path.join('cards', f'{image_filename}_front.jpg')
@@ -307,12 +322,12 @@ def deck(request, deck_name=None):
             audio_filename = f"{image_filename}.mp3"
             front_filename = f"{image_filename}_front.jpg"
             back_filename = f"{image_filename}_back.jpg"
-        
+            
             # First File Path - in the static directory
             staticfilesdirs = os.path.join(settings.STATICFILES_DIRS[0]) + "/cards/"
-            front_filename = os.path.join(settings.STATICFILES_DIRS[0], front_filename)
+            front_filename = os.path.join(settings.STATICFILES_DIRS[0], 'cards', front_filename)
             front_filename = front_filename.replace('\\', '/')   # Normalize path for OS compatibility
-            back_filename = os.path.join(settings.STATICFILES_DIRS[0], back_filename)
+            back_filename = os.path.join(settings.STATICFILES_DIRS[0], 'cards', back_filename)
             back_filename = back_filename.replace('\\', '/')  # Normalize path for OS compatibility
             print(staticfilesdirs)
             print(back_filename)
@@ -320,45 +335,46 @@ def deck(request, deck_name=None):
             back_img.save(back_filename), 'JPEG'
 
             try:
-                image_files, card_files = generate_image(f"A beautiful photo realistic and imaginative, depiction of the phrase \"{new_row['sentenceeng']}.\" If people in scenes are absolutely necessary, then show mostly alternative lifestyle, postapocalyptic lifestyle, with themes of science and future. But only insert people if absolutely necessary to get the meaning across visually. Hyper photo realistic. Add French culture. No text or fingers", image_filename)
-                for ai_card in card_files:
-                    with Image.open(ai_card) as card_write:
-                        print(f"writen card is here: {ai_card}")
-                        write_image((832, 1152), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', -225, card_write)
-                        write_image((832, 1152), new_row['sentenceforeign'], font, 'black', -75, card_write)
-                        #write_image((832, 1152), SIMPLIFIED_CHAR, font, 'black', 75, card_write)
-                        card_write.save(ai_card, 'JPEG')
-                print(f'{image_filename}_front.jpg')
+                #image_files, card_files = generate_image(f"A beautiful photo realistic and imaginative, depiction of the phrase \"{new_row['sentenceeng']}.\" If people in scenes are absolutely necessary, then show mostly alternative lifestyle, postapocalyptic lifestyle, with themes of science and future. But only insert people if absolutely necessary to get the meaning across visually. Hyper photo realistic. Add French culture. No text or fingers", image_filename)
+                #for ai_card in card_files:
+                #    with Image.open(ai_card) as card_write:
+                #        print(f"writen card is here: {ai_card}")
+                #        write_image((hdim, vdim), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', line2, card_write)
+                #        write_image((hdim, vdim), new_row['sentenceforeign'], font, 'black', line3, card_write)
+                #        #write_image((hdim, vdim), SIMPLIFIED_CHAR, font, 'black', 75, card_write)
+                #        card_write.save(ai_card, 'JPEG')
+                #print(f'{image_filename}_front.jpg')
 
                         #audio creation
-                client = []
-                client = OpenAI(api_key="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")
-                audiofile = f"{new_row['word']}.mp3"
-                speech_file_path = os.path.join(settings.STATICFILES_DIRS[0]) + "/cards/" + audio_filename
-                speech_file_path = speech_file_path.replace('\\', '/')  # Normalize path for OS compatibility
-                print(audiofile)
-                print(speech_file_path)
+                #client = []
+                #client = OpenAI(api_key="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")
+                #audiofile = f"{new_row['word']}.mp3"
+                #speech_file_path = os.path.join(settings.STATICFILES_DIRS[0]) + "/cards/" + audio_filename
+                #speech_file_path = speech_file_path.replace('\\', '/')  # Normalize path for OS compatibility
+                #print(audiofile)
+                #print(speech_file_path)
                 
-                response = []
-                response = client.audio.speech.create(
-                model="tts-1-hd",
-                voice="alloy",
-                input=new_row['sentenceforeign']
-                ) 
-                response.stream_to_file(speech_file_path)
+                #response = []
+                #response = client.audio.speech.create(
+                #model="tts-1-hd",
+                #voice="onyx",
+                #input=new_row['sentenceforeign']
+                #) 
+                #response.stream_to_file(speech_file_path)
                 #play_audio(speech_file_path)
                 front_image_path = front_image_path.replace('\\', '/') 
                 back_image_path = back_image_path.replace('\\', '/') 
                 new_row.update({
-                    'image_path_front': f'{image_filename}_front.jpg',
+                    'front_image': f'{image_filename}_front.jpg',
                     'image_path_back': f'{image_filename}_back.jpg',
-                    'primary_image': image_files[0] if image_files else None,  # Check if image_files is not empty
-                    'phraseaudio': audio_filename
+                    'primary_image': f'{image_filename}_back.jpg',
+                    #'primary_image': image_files[0] if image_files else None,  # Check if image_files is not empty
+                    #'phraseaudio': audio_filename
                 })
 
                 # Update new_row with 'image_pathN' keys
-                for i in range(len(image_files)):
-                    new_row[f'image_path{i}'] = image_files[i]
+                #for i in range(len(image_files)):
+                #    new_row[f'image_path{i}'] = image_files[i]
 
             except ValueError as e:
                 messages.error(request, f'Error generating image for "{text_for_image}": {e}')
@@ -381,11 +397,18 @@ def deck(request, deck_name=None):
 
     # Sort the decks by deck name
     sorted_decks = sorted(decks.items(), key=lambda x: x[0])
+    
+    # At the point in the view where you want to trigger the task:
+    async_task(check_and_generate_images)
 
     return render(request, 'flashcards/deck.html', {'decks': sorted_decks}) 
 
 
+
 from datetime import datetime
+
+from datetime import datetime
+import pymongo
 
 def card(request, deck_name, word=None):
     mongo_collection = mongo_handler()
@@ -399,55 +422,33 @@ def card(request, deck_name, word=None):
             # Handle this case appropriately, e.g., show an error message or a default card
             pass
 
-        new_indx = [indx[0]+1 if indx[0]+1 < len(res) else 0]
-        next_card = res[new_indx[0]]
-        next_word = res[new_indx[0]+1]['word'] if new_indx[0]+1 < len(res) else res[0]['word']
+        # Calculate the index for the next card
+        next_indx = indx[0] + 1 if indx[0] + 1 < len(res) else 0
+        next_word = res[next_indx]['word']
 
-        increment_reviewed(next_card, mongo_collection)
+        # Calculate the index for the previous card
+        prev_indx = indx[0] - 1 if indx[0] > 0 else len(res) - 1
+        prev_word = res[prev_indx]['word']
 
-        # Find the next session date
-        next_session = find_next_session(next_card)
+        current_card = res[indx[0]]
+        increment_reviewed(current_card, mongo_collection)
+
+        # Find the next session date for the current card
+        next_session = find_next_session(current_card)
         next_session_formatted = next_session.strftime("%A %d/%m/%Y %H:%M") if next_session else None
 
         return render(request, 'flashcards/card.html', {
-            'card': next_card,
+            'card': current_card,
             'next_word': next_word,
+            'prev_word': prev_word,
             'next_session': next_session_formatted
         })
 
-    # Fetch cards whose next session date is today or in the past
-    query = {
-        "deck": str(deck_name),
-        "$or": [{"session1": {"$lte": current_time}}, {"session1": {"$exists": False}}]
-        # Add similar conditions for other session dates if needed
-    }
-    res = list(mongo_collection.find(query).sort([("word", pymongo.ASCENDING)]))
+    # Handle the case where word is None
+   
 
-    if not res:
-        # Handle the case where there are no cards to review
-        return render(request, 'flashcards/nocards.html')
-
-    first_card = res[0]
-    next_word = res[1]['word'] if len(res) > 1 else res[0]['word']
-
-    increment_reviewed(first_card, mongo_collection)
-
-    # Find the next session date
-    next_session = find_next_session(first_card)
-    next_session_formatted = next_session.strftime("%A %d/%m/%Y %H:%M") if next_session else None
-
-    return render(request, 'flashcards/card.html', {
-        'card': first_card,
-        'next_word': next_word,
-        'next_session': next_session_formatted
-    })
 
 # Make sure to define your increment_reviewed and find_next_session functions as well
-
-
-
-
-
 def increment_reviewed(card, mongo_handler):
     current_review_count = card.get('reviewed', 0)
 
@@ -497,3 +498,21 @@ def find_next_session(card):
         if session_time and session_time > current_time:
             return session_time
     return None
+
+def check_and_generate_images():
+    mongo_collection = mongo_handler()  # Make sure this is properly defined
+    cards_data = mongo_collection.find()
+
+    for card in cards_data:
+        if 'word' in card:
+                image_filename = f"{card['deck']}_{card['word']}"
+                image_path = os.path.join(settings.STATICFILES_DIRS[0], 'cards', image_filename)
+
+                if not os.path.exists(image_path):
+                    print(image_path)
+                    print(f"Generating Image for ID {card['_id']} Deck: {card['deck']} {card['word']}")
+                    generate_image(f"A beautiful photo realistic and imaginative, depiction of the phrase \"{card['sentenceeng']}.\" If people in scenes are absolutely necessary, then show mostly alternative lifestyle, postapocalyptic lifestyle, with themes of science and future. But only insert people if absolutely necessary to get the meaning across visually. Hyper photo realistic. Add French culture. No text or fingers", image_filename)
+        else:
+            print(f"Card missing 'word': ID {card['_id']} in deck {card['deck']}")
+
+

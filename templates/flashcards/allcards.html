@@ -8,8 +8,11 @@
         <div class="card-container" id="card-{{ card.id }}">
             <div class="word-container">{{ card.word }}</div>
             <div class="image-container">
+                    <img src="/static/cards/{{ card.front_image }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')">
                 {% for image_path in card.image_paths %}
                     <img src="/static/cards/{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')">
+
+
                 {% endfor %}
             </div>
         </div>
@@ -21,7 +24,7 @@
 <style>
     .gallery {
         width: 100%;
-        max-width: 1400px;
+        max-width: 2000px;
         margin: auto;
         padding: 10px;
     }
@@ -33,18 +36,18 @@
         padding: 10px;
     }
     .word-container {
-        width: 2%;
-        margin-right: 200px;
-        font-size: 20px;
+        width: 15%;
+        margin-right: 0px;
+        font-size: 25px;
         font-weight: bold;   
     }
     .image-container {
-        display: flex;
+        float: left;
         justify-content: space-between;
         width: 100%;
     }
     .image-container img {
-        width: 22%;
+        width: 30%;
         height: auto;
         border: 1px solid #ddd;
         border-radius: 4px;
