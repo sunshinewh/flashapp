@@ -414,6 +414,21 @@ def card(request, deck_name, word=None):
     mongo_collection = mongo_handler()
     current_time = datetime.now()
 
+    # Handle POST request for updates
+    if request.method == 'POST' and word:
+        updated_data = {
+            'word': request.POST.get('word'),
+            'approximation': request.POST.get('approximation'),
+            'sentenceeng': request.POST.get('sentenceeng'),
+            'meaning': request.POST.get('meaning'),
+            'sentenceforeign': request.POST.get('sentenceforeign'),
+        }
+        # Update the database
+        mongo_collection.update_one({'word': word, 'deck': deck_name}, {'$set': updated_data})
+        # Redirect to avoid double submission
+        return redirect('card', deck_name=deck_name, word=word)
+
+
     # Handle specific word request
     if word:
         res = list(mongo_collection.find({"deck": deck_name}).sort([("word", pymongo.ASCENDING)]))
