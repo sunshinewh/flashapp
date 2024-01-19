@@ -381,7 +381,8 @@ def set_primary_image_view(request):
     # Decode the request body to JSON
     data = json.loads(request.body)
     card_id = data.get('cardId')
-    new_image_path = data.get('imagePath')
+    #new_image_path = data.get('imagePath')
+    new_image_path = new_image_url.split('/')[-1].split('?')[0]
 
     if card_id and new_image_path:
         set_primary_image(card_id, new_image_path)
