@@ -651,6 +651,8 @@ def deck(request, deck_name=None):
         decks[doc['deck']]['count'] += 1
         if len(decks[doc['deck']]['sample_cards']) < 4:
             thumbnail_url = generate_presigned_url(f"cards/{doc['primary_image']}")
+            print(f"primage: {primary_image}")
+            print(f"thumb: {thumbnail_url}")
             doc['thumbnail_url'] = thumbnail_url
             decks[doc['deck']]['sample_cards'].append(doc)
 
@@ -674,6 +676,7 @@ def generate_presigned_url(object_key):
             'Key': object_key,
         }, ExpiresIn=3600)  # URL expires in 1 hour
         return url
+        print(f"url: {url}")
     except Exception as e:
         print("Error generating presigned URL: ", e)
         return None
