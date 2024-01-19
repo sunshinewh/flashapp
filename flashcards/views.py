@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.views.decorators.http import require_POST
-from .utils import set_primary_image  # Importing from utils.py
+#from .utils import set_primary_image  # Importing from utils.py
 import random
 import chardet
 import textwrap
@@ -38,7 +38,20 @@ from datetime import datetime, timedelta
 from django_q.tasks import async_task
 import boto3
 import requests
+from botocore.exceptions import NoCredentialsError, ClientError
 
+def get_existing_images(s3_client, bucket_name, prefix):
+    try:
+        existing_images = []
+        paginator = s3_client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+        for page in pages:
+            for obj in page['Contents']:
+                existing_images.append(obj['Key'])
+        return existing_images
+    except (NoCredentialsError, ClientError) as e:
+        print(f"Error accessing S3: {e}")
+        return None
 
 # Create an S3 client
 
@@ -289,32 +302,32 @@ def generate_ai_images(request):
 
     return redirect('home')  # Redirect to home if not a POST request
 
+# View for generating bulk AI images
+@require_POST
 def generate_bulk_ai_images(request):
     hdim = 1152
     vdim = 832
     FONTSIZE = 100
     SHADOWWIDTH = 5
-    def get_text_dimensions(text_string, font):
-        ascent, descent = font.getmetrics()
-        width = font.getmask(text_string).getbbox()[2]
-        height = font.getmask(text_string).getbbox()[3] + descent 
-        return (width, height)
-        
     line1 = -75
-    line2 =  75
+    line2 = 75
     line3 = 225
     mongo_collection = mongo_handler()
     FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
     regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
     font = ImageFont.truetype(FONTNAME, FONTSIZE)
     ipa_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
-    # Load fonts
     regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
     ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
     font = ImageFont.truetype(regular_font_path, FONTSIZE)
     line_spacing = 300  # Additional space between lines, adjust as needed
 
     if request.method == 'POST':
+        s3_client = boto3.client('s3')
+        existing_images = get_existing_images(s3_client, AWS_STORAGE_BUCKET_NAME, 'cards/')
+        if existing_images is None:
+            return redirect('error_page')
+
         all_cards = mongo_collection.find({}) 
         for card in all_cards:
             text_string = card['word']
@@ -327,62 +340,66 @@ def generate_bulk_ai_images(request):
             sentenceforeign = card['sentenceforeign']
             sentenceeng = card['sentenceeng']
             style_preset = "Anime"
-            #text_string = word
             filebase = f"{deck}_{word}".replace(' ', '_')
+            filepaths_to_check = [f"cards/{filebase}_{i}.jpg" for i in range(numimages)]
+            if not all(filepath in existing_images for filepath in filepaths_to_check):
+                try:
+                    # Call generate_image with filebase and text_string
+                    # [Assuming generate_image and other necessary functions are defined elsewhere]
+                    card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
 
-            try:
-                # Call generate_image with filebase and text_string
-                card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
+                    # Initialize update_dict
+                    update_dict = {}
 
-                # Initialize update_dict
-                update_dict = {}
+                    # Update dictionary with new image paths
+                    for i, path in enumerate(image_paths):
+                        print(f"image_paths: {image_paths}")
+                        print(f"path: {path}")
+                        full_path = f"cards/{path}"
 
-                # Update dictionary with new image paths
-                for i, path in enumerate(image_paths):
-                    print(f"image_paths: {image_paths}")
-                    print(f"path: {path}")
-                    # Ensure the path includes the 'cards/' prefix
-                    full_path = f"cards/{path}"
+                        # Retrieve the image from S3
+                        response = s3_client.get_object(Bucket=AWS_STORAGE_BUCKET_NAME, Key=full_path)
+                        file_content = response['Body'].read()
 
-                    # Retrieve the image from S3
-                    response = s3client.get_object(Bucket=AWS_STORAGE_BUCKET_NAME, Key=full_path)
-                    file_content = response['Body'].read()
+                        # Open the image file directly from bytes
+                        with Image.open(BytesIO(file_content)) as card_write:
+                            # Perform your image modifications
+                            # [Assuming write_image function is defined elsewhere]
+                            write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                            write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
 
-                    # Open the image file directly from bytes
-                    with Image.open(BytesIO(file_content)) as card_write:
-                        # Perform your image modifications
-                        write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
-                        write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
+                            # Save the modified image to a buffer
+                            buffer = BytesIO()
+                            card_write.save(buffer, 'JPEG')
+                            buffer.seek(0)
 
-                        # Save the modified image to a buffer
-                        buffer = BytesIO()
-                        card_write.save(buffer, 'JPEG')
-                        buffer.seek(0)
+                            # Upload the modified image back to S3
+                            s3_client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
 
-                        # Upload the modified image back to S3
-                        s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
+                        # Update your dictionary to reflect the full path
+                        update_dict[f'image_path{i}'] = full_path
+                    # Update the MongoDB document
+                    mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
-                    # Update your dictionary to reflect the full path
-                    update_dict[f'image_path{i}'] = full_path
-                # Update the MongoDB document
-                mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
-
-            except Exception as e:
-                print(f"Error generating images: {e}")
-                # Handle error (e.g., display a message to the user)
+                except Exception as e:
+                    print(f"Error generating images: {e}")
 
         return redirect('my_cards')  # Redirect back to the cards page
 
     return redirect('home')  # Redirect to home if not a POST request
-
 
 @require_POST
 def set_primary_image_view(request):
     # Decode the request body to JSON
     data = json.loads(request.body)
     card_id = data.get('cardId')
-    #new_image_path = data.get('imagePath')
-    new_image_path = new_image_url.split('/')[-1].split('?')[0]
+    new_image_url = data.get('imagePath')
+
+    # Extract filename from URL
+    if new_image_url:
+        new_image_path = new_image_url.split('/')[-1].split('?')[0]
+    else:
+        new_image_path = None
 
     if card_id and new_image_path:
         set_primary_image(card_id, new_image_path)
@@ -390,10 +407,12 @@ def set_primary_image_view(request):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid data received'})
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from bson import ObjectId
+def set_primary_image(card_id, new_image_path):
+    collection = mongo_handler()
+    query = {'_id': ObjectId(card_id)}
+    updated_card = {"$set": {'primary_image': new_image_path}}
+    collection.update_one(query, updated_card)
+    return
 
 # Assume mongo_handler() is a function that returns a MongoDB collection
 #from your_app_name.mongo_utils import mongo_handler
