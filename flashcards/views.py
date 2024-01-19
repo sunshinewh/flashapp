@@ -445,6 +445,7 @@ def my_cards(request):
     # Handle POST request for updates
     if request.method == 'POST':
         data = request.POST
+        card_id = data.get('card_id')  # Retrieve card_id from POST data
         deck_name = data.get('deck_name')
         updated_data = {
             'word': data.get('word'),
@@ -453,8 +454,12 @@ def my_cards(request):
             'meaning': data.get('meaning'),
             'sentenceforeign': data.get('sentenceforeign'),
         }
-        mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': updated_data})
-        #return JsonResponse({'status': 'success', 'message': 'Card updated successfully'})
+        if card_id:
+            mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': updated_data})
+            #return JsonResponse({'status': 'success', 'message': 'Card updated successfully'})
+        else:
+            # Handle the case where 'card_id' is missing
+            pass
         return redirect('my_cards')
 
     # Handle GET request
