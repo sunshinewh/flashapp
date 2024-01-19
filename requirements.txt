@@ -19,10 +19,13 @@ click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
 cryptography==41.0.7
+distlib==0.3.8
 distro==1.8.0
 dj-database-url==2.1.0
 Django==4.1.4
 django-environ==0.11.2
+django-environment==0.3.8
+django-extensions==3.2.3
 django-heroku==0.3.1
 django-on-heroku==1.1.2
 django-picklefield==3.1
@@ -31,6 +34,7 @@ django-storages==1.13.2
 dnspython==2.4.2
 ffmpeg==1.4
 ffprobe==0.5
+filelock==3.13.1
 futures==3.0.5
 grpcio==1.53.0
 grpcio-tools==1.53.0
@@ -50,7 +54,9 @@ opencv-python==4.9.0.80
 packaging==23.2
 param==2.0.1
 pathlib==1.0.1
+pbr==6.0.0
 Pillow==9.4.0
+platformdirs==4.1.0
 prompt-toolkit==3.0.41
 protobuf==4.21.12
 psycopg2==2.9.9
@@ -72,6 +78,7 @@ sketchify==0.0.8
 sniffio==1.3.0
 sqlparse==0.2.4
 stability-sdk==0.8.4
+stevedore==5.1.0
 stripe==5.0.0
 tqdm==4.66.1
 types-python-dateutil==2.8.19.20240106
@@ -79,5 +86,8 @@ typing_extensions==4.8.0
 tzdata==2023.3
 urllib3==1.26.18
 vine==5.1.0
+virtualenv==20.25.0
+virtualenv-clone==0.5.7
+virtualenvwrapper==6.0.0
 wcwidth==0.2.10
 whitenoise==6.6.0
