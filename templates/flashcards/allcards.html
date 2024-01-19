@@ -84,17 +84,16 @@
                 <button type="submit" class="btn btn-primary btn-sm">Update</button>
             </form>
 
-
             <div class="image-container">
-                <img src="{% static 'cards/' %}{{ card.front_image }}">
+                <img src="{{ card.front_image_url }}"> <!-- Updated to use presigned URL -->
+                <img src="{{ card.back_image_url }}"> <!-- Updated to use presigned URL -->
                 {% for image_path in card.image_paths %}
-                    <img src="{% static 'cards/' %}{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')">
+                    <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
                 {% endfor %}
             </div>
-                
         </div>
-        
     {% endfor %}
+                
 </div>
 {% endblock %}
 

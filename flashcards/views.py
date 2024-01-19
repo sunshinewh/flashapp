@@ -8,6 +8,7 @@ from collections import defaultdict
 import csv
 import os
 import io
+from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
@@ -35,6 +36,45 @@ from openai import OpenAI
 from pydub import AudioSegment
 from datetime import datetime, timedelta
 from django_q.tasks import async_task
+import boto3
+import requests
+
+
+# Create an S3 client
+
+s3client = boto3.client(
+    's3',
+    aws_access_key_id='AKIAVJ2P6UW74SZHNEMD',
+    aws_secret_access_key='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',
+    region_name='us-west-2'
+)
+
+import boto3
+from botocore.exceptions import ClientError
+import logging
+
+def create_presigned_url(bucket_name, object_name, expiration=3600):
+    """Generate a presigned URL to share an S3 object.
+
+    :param bucket_name: string
+    :param object_name: string
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+
+    try:
+        response = s3client.generate_presigned_url('get_object',
+                                                    Params={'Bucket': bucket_name,
+                                                            'Key': object_name},
+                                                    ExpiresIn=expiration)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    return response
+
+
+AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
 hdim = 832
 vdim = 1152
@@ -95,17 +135,9 @@ def generate_image(filename_base, text_string, style_preset, numimages):
         engine="stable-diffusion-xl-1024-v1-0",
     )
     
-    
     # Generate images
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
-        # First File Path - in the static directory
-        static_path = os.path.join(settings.STATICFILES_DIRS[0], filename)
-        static_path = static_path.replace('\\', '/')  # Normalize path for OS compatibility
-
-        # Second File Path - in the 'cards' subdirectory under static
-        cards_path = os.path.join(settings.STATICFILES_DIRS[0], 'cards', filename)
-        cards_path = cards_path.replace('\\', '/')  # Normalize path for OS compatibility
 
         # Generate a random 8-digit number
         random_number = random.randint(10000, 99999)
@@ -130,13 +162,23 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                     raise ValueError("Request activated the API's safety filters and could not be processed.")
                 if artifact.type == generation.ARTIFACT_IMAGE:
                     img = Image.open(io.BytesIO(artifact.binary)) 
-                    img.save(static_path, 'JPEG')
                     image_paths.append(filename)  # Append to image_paths
-                    img.save(cards_path, 'JPEG') 
-                    card_files.append(cards_path)  # Append to image_paths
-                    print(f"Saved to static: {static_path}")   
-                    print(f"Saved to cards: {cards_path}")   
-                    print(f"Saved card file locations: {card_files}")   
+                    card_files.append(filename)  # Append to image_paths
+
+                    AWS_STORAGE_BUCKET_NAME="flashappbucket"
+                    key = f"cards/{filename}"
+                    buffer = io.BytesIO()
+                    img.save(buffer, "JPEG")
+                    buffer.seek(0)
+                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+
+                    AWS_STORAGE_BUCKET_NAME="flashappbucket"
+                    key = f"raw/{filename}"
+                    buffer = io.BytesIO()
+                    img.save(buffer, "JPEG")
+                    buffer.seek(0)
+                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+
     return image_paths, card_files
 
 def home(request):
@@ -200,14 +242,44 @@ def generate_ai_images(request):
 
             # Update dictionary with new image paths
             for i, path in enumerate(image_paths):
-                with Image.open(path) as card_write:
-                    write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
-                    write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)    
-                    card_write.save(path, 'JPEG')
-                    update_dict[f'image_path{i}'] = path
+                print(f"image_paths: {image_paths}")
+                print(f"path: {path}")
+                # Ensure the path includes the 'cards/' prefix
+                full_path = f"cards/{path}"
+                print(f"fullpath: {full_path}")
 
-            # Update the MongoDB document
-            mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
+                # Retrieve the image from S3
+                # Usage example
+                presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
+
+                if presigned_url is not None:
+                    print("Presigned URL:", presigned_url)
+
+                # Fetch the content from the URL
+                response = requests.get(presigned_url)
+
+                with Image.open(BytesIO(response.content)) as card_write:
+                    # Now you can use img as a normal PIL Image object
+                    #img.show()  # For example, display the image
+                    # Perform other operations with img as needed
+
+                #with Image.open(BytesIO(file_content)) as card_write:
+                    # Perform your image modifications
+                    write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                    write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
+
+                    # Save the modified image to a buffer
+                    buffer = BytesIO()
+                    card_write.save(buffer, 'JPEG')
+                    buffer.seek(0)
+
+                    # Upload the modified image back to S3
+                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
+
+                    # Update your dictionary to reflect the full path
+                    update_dict[f'image_path{i}'] = full_path
+                # Update the MongoDB document
+                mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
         except Exception as e:
             print(f"Error generating images: {e}")
@@ -267,12 +339,31 @@ def generate_bulk_ai_images(request):
 
                 # Update dictionary with new image paths
                 for i, path in enumerate(image_paths):
-                    with Image.open(path) as card_write:
-                        write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
-                        write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)    
-                        card_write.save(path, 'JPEG')
-                        update_dict[f'image_path{i}'] = path
+                    print(f"image_paths: {image_paths}")
+                    print(f"path: {path}")
+                    # Ensure the path includes the 'cards/' prefix
+                    full_path = f"cards/{path}"
 
+                    # Retrieve the image from S3
+                    response = s3client.get_object(Bucket=AWS_STORAGE_BUCKET_NAME, Key=full_path)
+                    file_content = response['Body'].read()
+
+                    # Open the image file directly from bytes
+                    with Image.open(BytesIO(file_content)) as card_write:
+                        # Perform your image modifications
+                        write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                        write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
+
+                        # Save the modified image to a buffer
+                        buffer = BytesIO()
+                        card_write.save(buffer, 'JPEG')
+                        buffer.seek(0)
+
+                        # Upload the modified image back to S3
+                        s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
+
+                    # Update your dictionary to reflect the full path
+                    update_dict[f'image_path{i}'] = full_path
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
@@ -352,7 +443,9 @@ def my_cards(request):
 
     for card in cards_data:
         card['id'] = str(card['_id'])
-        card['image_paths'] = [card[key] for key in card if key.startswith('image_path')]
+        card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
+        card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
+        card['image_paths'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')]
         cards.append(card)
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
@@ -443,8 +536,10 @@ def deck(request, deck_name=None):
             new_row = {key: value for key, value in row.items()}
             new_row['deck'] = deck_name
             new_row['reviewed'] = 0
-            text_for_image = new_row['word']
-            image_filename = f"{deck_name}_{new_row['word']}".replace('\\', '/')
+            text_for_image = new_row.get('word', 'DefaultWord')
+            image_filename = f"{deck_name}_{new_row['word']}".replace(' ', '_')
+            print(f"Word: {text_for_image}")
+            print(f"image_filename: {image_filename}")
             print(f"Word: {text_for_image}")
             print(f"image_filename: {image_filename}")
             
@@ -479,23 +574,23 @@ def deck(request, deck_name=None):
             write_image((vdim, hdim), new_row['sentenceforeign'], font, 'black', line3, back_img)
             
             # Save images and construct relative paths
-            front_image_path = os.path.join('cards', f'{image_filename}_front.jpg')
-            back_image_path = os.path.join('cards', f'{image_filename}_back.jpg')
-
             audio_filename = f"{image_filename}.mp3"
             front_filename = f"{image_filename}_front.jpg"
             back_filename = f"{image_filename}_back.jpg"
             
-            # First File Path - in the static directory
-            staticfilesdirs = os.path.join(settings.STATICFILES_DIRS[0]) + "/cards/"
-            front_filename = os.path.join(settings.STATICFILES_DIRS[0], 'cards', front_filename)
-            front_filename = front_filename.replace('\\', '/')   # Normalize path for OS compatibility
-            back_filename = os.path.join(settings.STATICFILES_DIRS[0], 'cards', back_filename)
-            back_filename = back_filename.replace('\\', '/')  # Normalize path for OS compatibility
-            print(staticfilesdirs)
-            print(back_filename)
-            front_img.save(front_filename), 'JPEG'
-            back_img.save(back_filename), 'JPEG'
+
+            AWS_STORAGE_BUCKET_NAME="flashappbucket"
+            key = f"cards/{front_filename}"
+            buffer = io.BytesIO()
+            front_img.save(buffer, "JPEG")
+            buffer.seek(0)
+            s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+
+            key = f"cards/{back_filename}"
+            buffer = io.BytesIO()
+            back_img.save(buffer, "JPEG")
+            buffer.seek(0)
+            s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
             try:
                 #image_files, card_files = generate_image(f"A beautiful photo realistic and imaginative, depiction of the phrase \"{new_row['sentenceeng']}.\" If people in scenes are absolutely necessary, then show mostly alternative lifestyle, postapocalyptic lifestyle, with themes of science and future. But only insert people if absolutely necessary to get the meaning across visually. Hyper photo realistic. Add French culture. No text or fingers", image_filename)
@@ -525,11 +620,10 @@ def deck(request, deck_name=None):
                 #) 
                 #response.stream_to_file(speech_file_path)
                 #play_audio(speech_file_path)
-                front_image_path = front_image_path.replace('\\', '/') 
-                back_image_path = back_image_path.replace('\\', '/') 
+                print(f"image_filename: {image_filename}")
                 new_row.update({
                     'front_image': f'{image_filename}_front.jpg',
-                    'image_path_back': f'{image_filename}_back.jpg',
+                    'back_image': f'{image_filename}_back.jpg',
                     'primary_image': f'{image_filename}_back.jpg',
                     #'primary_image': image_files[0] if image_files else None,  # Check if image_files is not empty
                     #'phraseaudio': audio_filename
@@ -556,13 +650,12 @@ def deck(request, deck_name=None):
     for doc in all_docs:
         decks[doc['deck']]['count'] += 1
         if len(decks[doc['deck']]['sample_cards']) < 4:
+            thumbnail_url = generate_presigned_url(f"cards/{doc['primary_image']}")
+            doc['thumbnail_url'] = thumbnail_url
             decks[doc['deck']]['sample_cards'].append(doc)
 
     # Sort the decks by deck name
     sorted_decks = sorted(decks.items(), key=lambda x: x[0])
-    
-    # At the point in the view where you want to trigger the task:
-    async_task(check_and_generate_images)
 
     return render(request, 'flashcards/deck.html', {'decks': sorted_decks}) 
 
@@ -572,6 +665,18 @@ from datetime import datetime
 
 from datetime import datetime
 import pymongo
+
+def generate_presigned_url(object_key):
+    s3_client = boto3.client('s3')
+    try:
+        url = s3client.generate_presigned_url('get_object', Params={
+            'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+            'Key': object_key,
+        }, ExpiresIn=3600)  # URL expires in 1 hour
+        return url
+    except Exception as e:
+        print("Error generating presigned URL: ", e)
+        return None
 
 def card(request, deck_name, word=None):
     mongo_collection = mongo_handler()
@@ -594,6 +699,7 @@ def card(request, deck_name, word=None):
 
     # Handle specific word request
     if word:
+        
         res = list(mongo_collection.find({"deck": deck_name}).sort([("word", pymongo.ASCENDING)]))
         indx = [i for i, d in enumerate(res) if word in d.values()]
         if not indx:  # If the word is not found
@@ -615,8 +721,13 @@ def card(request, deck_name, word=None):
         next_session = find_next_session(current_card)
         next_session_formatted = next_session.strftime("%A %d/%m/%Y %H:%M") if next_session else None
 
+        front_image_url = generate_presigned_url(f"cards/{current_card['front_image']}")
+        back_image_url = generate_presigned_url(f"cards/{current_card['primary_image']}")
+
         return render(request, 'flashcards/card.html', {
             'card': current_card,
+            'front_image_url': front_image_url,
+            'back_image_url': back_image_url,
             'next_word': next_word,
             'prev_word': prev_word,
             'next_session': next_session_formatted
@@ -683,7 +794,7 @@ def check_and_generate_images():
 
     for card in cards_data:
         if 'word' in card:
-                image_filename = f"{card['deck']}_{card['word']}"
+                image_filename = f"{card['deck']}_{card['word']}".replace(' ', '_')
                 image_path = os.path.join(settings.STATICFILES_DIRS[0], 'cards', image_filename)
 
                 if not os.path.exists(image_path):

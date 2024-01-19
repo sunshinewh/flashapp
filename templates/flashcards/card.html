@@ -9,8 +9,8 @@
 
 <center>
     <div class="image-container mt-5">
-        <img id="front_image" src="/static/cards/{{ card.front_image }}" alt="Image for {{ card.word }}" style="display: block;"> 
-        <img id="back_image" src="/static/cards/{{ card.primary_image }}" alt="Image for {{ card.word }}" style="display: none;"> 
+        <img id="front_image" src="{{ front_image_url }}" alt="Front Image" alt="Image for {{ card.word }}" style="display: block;"> 
+        <img id="back_image" src="{{ back_image_url }}" alt="Image for {{ card.word }}" style="display: none;"> 
         <div class="buttons-overlay">
                     <button id="prev_button" type="button" class="btn btn-danger btn-dark bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=prev_word %}">Back</button>
                     <button id="correct_button" type="button" class="btn btn-success btn-lg bigger-button" data-next-url="{% url 'card' deck_name=card.deck word=next_word %}">Correct</button>        

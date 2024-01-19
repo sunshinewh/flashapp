@@ -49,12 +49,11 @@
                         <!-- Sample Card Thumbnails with links -->
                         <div class="d-flex">
                             {% for card in deck_info.sample_cards %}
-                                <div>
-                                    <!-- Link to the card's review page -->
-                                    <a href="{% url 'card' deck_name=deck_name word=card.word %}">
-                                        <img src="/static/cards/{{ card.primary_image }}" alt="{{ card.word }}" class="img-thumbnail custom-thumbnail mr-2">
-                                    </a>
-                                </div>
+                            <div>
+                                <a href="{% url 'card' deck_name=deck_name word=card.word %}">
+                                    <img src="{{ card.thumbnail_url }}" alt="{{ card.word }}" class="img-thumbnail custom-thumbnail mr-2">
+                                </a>
+                            </div>
                             {% endfor %}
                         </div>
                         <!-- Dropdown Menu -->
