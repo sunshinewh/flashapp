@@ -3,6 +3,11 @@
 {% load static %}
 
 {% block body %}
+    <!-- Form for bulk generation -->
+    <form method="post" action="{% url 'generate_bulk_ai_images' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Generate AI Images for All Cards</button>
+    </form>
 <div class="gallery">
     {% for card in cards %}
         <div class="card-container" id="card-{{ card.id }}">

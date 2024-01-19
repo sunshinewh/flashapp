@@ -20,12 +20,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "o8a))*u-$1+d(cry@qt)4nyabv*!ucflu#%v0%intv1uh*%qsu"
-STRIPE_PUBLIC_KEY_TEST='pk_test_12345...'
-STRIPE_SECRET_KEY_TEST='sk_test_12345...'
-STRIPE_WEBHOOK_SECRET_TEST='whsec_12345..'
-PRODUCT_PRICE='price_12345...'
 
 MONGO_USER='user'
 MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
@@ -58,6 +52,8 @@ INSTALLED_APPS = [
     'django_heroku',
     'django_on_heroku',
     'django_q',
+    'django_extensions',
+    'django_storages'
 ]
 
 MIDDLEWARE = [
@@ -198,3 +194,5 @@ Q_CLUSTER = {
     'orm': 'default',
     'redis': os.getenv('REDIS_URL')  # Use Redis URL from the environment variable
 }
+
+Default_File_Storage = 

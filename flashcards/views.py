@@ -119,7 +119,6 @@ def generate_image(filename_base, text_string, style_preset, numimages):
             cfg_scale=8.0,
             width=1152,
             height=832,
-
             samples=1,  # If the API supports generating multiple images at once, set this to 4 and adjust the loop
             sampler=generation.SAMPLER_K_DPMPP_2M
         )
@@ -218,7 +217,72 @@ def generate_ai_images(request):
 
     return redirect('home')  # Redirect to home if not a POST request
 
+def generate_bulk_ai_images(request):
+    hdim = 1152
+    vdim = 832
+    FONTSIZE = 100
+    SHADOWWIDTH = 5
+    def get_text_dimensions(text_string, font):
+        ascent, descent = font.getmetrics()
+        width = font.getmask(text_string).getbbox()[2]
+        height = font.getmask(text_string).getbbox()[3] + descent 
+        return (width, height)
+        
+    line1 = -75
+    line2 =  75
+    line3 = 225
+    mongo_collection = mongo_handler()
+    FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    font = ImageFont.truetype(FONTNAME, FONTSIZE)
+    ipa_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+    # Load fonts
+    regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
+    ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
+    font = ImageFont.truetype(regular_font_path, FONTSIZE)
+    line_spacing = 300  # Additional space between lines, adjust as needed
 
+    if request.method == 'POST':
+        all_cards = mongo_collection.find({}) 
+        for card in all_cards:
+            text_string = card['word']
+            card_id = str(card['_id'])
+            numimages = 2  # Default to 1 if not provided
+            deck = card['deck']
+            word = card['word']
+            meaning = card['meaning']
+            full_ipa = card['full_ipa']
+            sentenceforeign = card['sentenceforeign']
+            sentenceeng = card['sentenceeng']
+            style_preset = "Anime"
+            #text_string = word
+            filebase = f"{deck}_{word}".replace(' ', '_')
+
+            try:
+                # Call generate_image with filebase and text_string
+                card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
+
+                # Initialize update_dict
+                update_dict = {}
+
+                # Update dictionary with new image paths
+                for i, path in enumerate(image_paths):
+                    with Image.open(path) as card_write:
+                        write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                        write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)    
+                        card_write.save(path, 'JPEG')
+                        update_dict[f'image_path{i}'] = path
+
+                # Update the MongoDB document
+                mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
+
+            except Exception as e:
+                print(f"Error generating images: {e}")
+                # Handle error (e.g., display a message to the user)
+
+        return redirect('my_cards')  # Redirect back to the cards page
+
+    return redirect('home')  # Redirect to home if not a POST request
 
 
 @require_POST
