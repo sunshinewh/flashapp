@@ -85,10 +85,10 @@
             </form>
 
             <div class="image-container">
-                <img src="{{ card.front_image_url }}"> <!-- Updated to use presigned URL -->
-                <img src="{{ card.back_image_url }}"> <!-- Updated to use presigned URL -->
+                <img src="{{ card.front_image_url }}"> <!-- Front image without onclick event -->
+                <img src="{{ card.back_image_url }}" onclick="setPrimaryImage('{{ card.id }}', '{{ card.back_image_url }}')"> <!-- Back image with onclick event -->
                 {% for image_path in card.image_paths %}
-                    <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
+                <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Other images with onclick event -->
                 {% endfor %}
             </div>
         </div>
@@ -181,25 +181,30 @@
     }
 </style>
 
+
 <script>
-    function setPrimaryImage(cardId, imagePath) {
-        fetch('/update_primary_image/', {
+    function setPrimaryImage(cardId, imageUrl) {
+        // Extract the filename from the imageUrl
+        const urlParts = imageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1].split('?')[0]; // Assuming the URL might have query parameters
+
+        // Send a POST request to update the primary image with just the filename
+        fetch("{% url 'set_primary_image_view' %}", {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ cardId: cardId, imagePath: imagePath })
-        }).then(response => response.json())
-          .then(data => {
-              if (data.status === 'success') {
-                  showNotification('Primary image updated successfully.');
-              } else {
-                  showNotification('Failed to update primary image.');
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-          });
+            body: JSON.stringify({cardId: cardId, imagePath: filename})
+        })
+        .then(response => response.json())
+        .then(data => {
+            // You can add some code here to handle the response
+            console.log(data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     }
     
     function showNotification(message, type) {

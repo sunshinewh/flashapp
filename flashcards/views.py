@@ -388,31 +388,40 @@ def generate_bulk_ai_images(request):
 
     return redirect('home')  # Redirect to home if not a POST request
 
-@require_POST
+require_POST
 def set_primary_image_view(request):
-    # Decode the request body to JSON
-    data = json.loads(request.body)
-    card_id = data.get('cardId')
-    new_image_url = data.get('imagePath')
+    try:
+        data = json.loads(request.body)
+        card_id = data.get('cardId')
+        new_image_url = data.get('imagePath')
 
-    # Extract filename from URL
-    if new_image_url:
-        new_image_path = new_image_url.split('/')[-1].split('?')[0]
-    else:
-        new_image_path = None
+        if new_image_url:
+            new_image_path = new_image_url.split('/')[-1].split('?')[0]
+        else:
+            new_image_path = None
 
-    if card_id and new_image_path:
-        set_primary_image(card_id, new_image_path)
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid data received'})
+        if card_id and new_image_path:
+            success = set_primary_image(card_id, new_image_path)
+            if success:
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Database update failed'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid data received'})
 
 def set_primary_image(card_id, new_image_path):
-    collection = mongo_handler()
-    query = {'_id': ObjectId(card_id)}
-    updated_card = {"$set": {'primary_image': new_image_path}}
-    collection.update_one(query, updated_card)
-    return
+    try:
+        collection = mongo_handler()
+        query = {'_id': ObjectId(card_id)}
+        updated_card = {"$set": {'primary_image': new_image_path}}
+        collection.update_one(query, updated_card)
+        return True
+    except Exception as e:
+        print(f"Error updating the database: {e}")
+        return False
 
 # Assume mongo_handler() is a function that returns a MongoDB collection
 #from your_app_name.mongo_utils import mongo_handler
@@ -501,9 +510,6 @@ def get_text_dimensions(text_string, font):
     width = font.getmask(text_string).getbbox()[2]
     height = font.getmask(text_string).getbbox()[3] + descent 
     return (width, height)
-
-
-
 
 def deck(request, deck_name=None):
     mongo_collection = mongo_handler()  # Ensure mongo_handler is defined elsewhere
@@ -685,10 +691,6 @@ def deck(request, deck_name=None):
     sorted_decks = sorted(decks.items(), key=lambda x: x[0])
 
     return render(request, 'flashcards/deck.html', {'decks': sorted_decks}) 
-
-
-
-from datetime import datetime
 
 from datetime import datetime
 import pymongo
