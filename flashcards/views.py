@@ -426,27 +426,34 @@ def set_primary_image(card_id, new_image_path):
 # Assume mongo_handler() is a function that returns a MongoDB collection
 #from your_app_name.mongo_utils import mongo_handler
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from bson import ObjectId
+# Assuming mongo_handler is defined elsewhere
+
 @csrf_exempt
 def update_primary_image(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         card_id = data['cardId']
-        image_path = data['imagePath']
+        image_url = data['imagePath']
+
+        # Extract the filename from the URL
+        filename = image_url.split('/')[-1].split('?')[0]
 
         mongo_collection = mongo_handler()
         update_result = mongo_collection.update_one(
             {'_id': ObjectId(card_id)},
-            {'$set': {'primary_image': image_path}},    
+            {'$set': {'primary_image': filename}},  # Use filename here
         )
-        print(image_path)
+        print(filename)  # Changed to filename for logging
         if update_result.modified_count > 0:
             return JsonResponse({'status': 'success'})
         else:
             return JsonResponse({'status': 'not_modified'}, status=400)
 
     return JsonResponse({'status': 'fail'}, status=400)
-
-from django.http import JsonResponse
 
 def my_cards(request):
     mongo_collection = mongo_handler()
