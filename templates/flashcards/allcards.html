@@ -26,13 +26,65 @@
                     <input type="number" name="numimages" min="1" max="4" value="2">
                 </div>
                 <div class="form-group">
-                    <label>Engine:</label>
-                    <select name="style_preset" id="style_dropdown">
-                        <option value="stable-diffusion-xl-1024-v1-0">xl-1024-v1-0</option>
-                        <option value="stable-diffusion-v1-6">stable-diffusion-v1-6</option>
+                    <label for="engine">Engine:</label>
+                    <select name="engine" id="engine">
+                        <option value="stable-diffusion-xl-1024-v1-0">Stable Diffusion XL 1.0</option>
+                        <option value="stable-diffusion-v1-6">Stable Diffusion 1.6</option>
+                        <option value="stable-diffusion-xl-1024-v0-9">Stable Diffusion XL 0.9</option>
                     </select>
+                </div>                
+                    <div class="form-group">
+                        <label for="style_preset">Style Preset:</label>
+                        <select name="style_preset" id="style_preset">
+                            <option value="3d-model">3D Model</option>
+                            <option value="analog-film">Analog Film</option>
+                            <option value="anime">Anime</option>
+                            <option value="cinematic">Cinematic</option>
+                            <option value="comic-book">Comic Book</option>
+                            <option value="digital-art">Digital Art</option>
+                            <option value="enhance">Enhance</option>
+                            <option value="fantasy-art">Fantasy Art</option>
+                            <option value="isometric">Isometric</option>
+                            <option value="line-art">Line Art</option>
+                            <option value="low-poly">Low-Poly</option>
+                            <option value="modeling-compound">Modeling Compound</option>
+                            <option value="neon-punk">Neon Punk</option>
+                            <option value="origami">Origami</option>
+                            <option value="photographic">Photographic</option>
+                            <option value="pixel-art">Pixel Art</option>
+                            <option value="tile-texture">Tile Texture</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sampler">Sampler:</label>
+                        <select name="sampler" id="sampler">
+                            <option value="ddim">DDIM</option>
+                            <option value="plms">PLMS</option>
+                            <option value="k_euler">K_EULER</option>
+                            <option value="k_euler_ancestral">K_EULER_ANCESTRAL</option>
+                            <option value="k_heun">K_HEUN</option>
+                            <option value="k_dpm_2">K_DPM_2</option>
+                            <option value="k_dpm_2_ancestral">K_DPM_2_ANCESTRAL</option>
+                            <option value="k_dpmpp_2s_ancestral">K_DPMPP_2S_ANCESTRAL</option>
+                            <option value="k_lms">K_LMS</option>
+                            <option value="k_dpmpp_2m">K_DPMPP_2M</option>
+                            <option value="k_dpmpp_sde">K_DPMPP_SDE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="clip_guidance_preset">Clip Guidance Preset:</label>
+                        <select name="clip_guidance_preset" id="clip_guidance_preset">
+                            <option value="NONE">NONE</option>
+                            <option value="FAST_BLUE">FAST_BLUE</option>
+                            <option value="FAST_GREEN">FAST_GREEN</option>
+                            <option value="SIMPLE">SIMPLE</option>
+                            <option value="SLOW">SLOW</option>
+                            <option value="SLOWER">SLOWER</option>
+                            <option value="SLOWEST">SLOWEST</option>
+                        </select>
+                    </div>
                 <div class="form-group">
-                    <label>Static Diffusion Style:</label>
+                    <label>Style:</label>
                     <select name="style_preset" id="style_dropdown">
                         <option value="None">None</option>
                         <option value="Enhance">Enhance</option>

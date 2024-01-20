@@ -860,3 +860,63 @@ def image_generation_test(request):
 
     return render(request, 'image_generation_test.html')
 
+import json
+import base64
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def generate_images2(request):
+    if request.method == 'POST':
+        try:
+            # Get the data from the POST request
+            data = json.loads(request.body.decode('utf-8'))
+            prompt_text = data.get('prompt_text', '')  # Use a default value or handle missing data
+
+            # Define variables for other properties
+            engine = data.get('engine', 'stable-diffusion-xl-1024-v1-0')
+            style = data.get('style', 'text-to-image')
+            sampler = data.get('sampler', 'image')
+            clip_guidance_preset = data.get('clip_guidance_preset', 'default')
+            positive_prompt = data.get('positive_prompt', '')
+            negative_prompt = data.get('negative_prompt', '')
+
+            # Replace 'YOUR_API_KEY_HERE' with your actual API key
+            api_key = 'YOUR_API_KEY_HERE'
+
+            # Define the API endpoint
+            api_url = f'https://api.stability.ai/v1/generation/{engine}/{style}'
+
+            # Make a POST request to the API
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            }
+            payload = {
+                'text_prompts': [{'text': prompt_text}],
+                'sampler': sampler,
+                'clip_guidance_preset': clip_guidance_preset,
+                'positive_prompt': positive_prompt,
+                'negative_prompt': negative_prompt
+            }
+            response = requests.post(api_url, headers=headers, json=payload)
+            response_data = response.json()
+
+            # Extract and return the generated images as JSON
+            images = response_data.get('artifacts', [])
+            image_data = []
+            for index, image in enumerate(images):
+                base64_image = image['base64']
+                image_data.append({
+                    'index': index + 1,
+                    'base64': base64_image
+                })
+
+            return JsonResponse({'images': image_data})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
