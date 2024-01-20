@@ -88,7 +88,8 @@
                 <img src="{{ card.front_image_url }}"> <!-- Updated to use presigned URL -->
                 <img src="{{ card.back_image_url }}" onclick="setPrimaryImage('{{ card.id }}', '{{ card.back_image_url }}')"> <!-- Back image with onclick event -->
                 {% for image_path in card.image_paths %}
-                    <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
+                #<img src="/static/cards/{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')">    
+                <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
                 {% endfor %}
             </div>
         </div>
@@ -154,6 +155,7 @@
         border-radius: 5px;
         display: none;
     }
+    
     .edit-card-form {
         flex: 1;  /* Assign flex-grow */
         display: flex;
@@ -183,28 +185,34 @@
 
 
 <script>
-    function setPrimaryImage(cardId, imagePath) {
-        // Extract the filename from the imageUrl
-        const urlParts = imageUrl.split('/');
-        const filename = urlParts[urlParts.length - 1].split('?')[0]; // Assuming the URL might have query parameters
-        fetch('/update_primary_image/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ cardId: cardId, imagePath: imagePath })
-        }).then(response => response.json())
-          .then(data => {
-              if (data.status === 'success') {
-                  showNotification('Primary image updated successfully.');
-              } else {
-                  showNotification('Failed to update primary image.');
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-          });
-    }
+function setPrimaryImage(cardId, imageUrl) {
+    // Extract the filename from the imageUrl
+    const urlParts = imageUrl.split('/');
+    const filename = urlParts[urlParts.length - 1].split('?')[0]; // Assuming the URL might have query parameters
+
+    fetch('/update_primary_image/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cardId: cardId, imagePath: filename })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showNotification('Primary image updated successfully.', 'success');
+        } else {
+            showNotification('Failed to update primary image.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred.', 'error');
+    });
+}
+
+// Ensure that the showNotification function is also correctly defined
+
     
     function showNotification(message, type) {
         const notification = document.getElementById('notification');

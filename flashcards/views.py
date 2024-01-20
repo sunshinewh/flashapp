@@ -437,23 +437,22 @@ def update_primary_image(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         card_id = data['cardId']
-        image_url = data['imagePath']
-
-        # Extract the filename from the URL
-        filename = image_url.split('/')[-1].split('?')[0]
-
+        image_path = data['imagePath']
+        print(f"Updating primary image: {image_path}")  # Debug print
         mongo_collection = mongo_handler()
         update_result = mongo_collection.update_one(
             {'_id': ObjectId(card_id)},
-            {'$set': {'primary_image': filename}},  # Use filename here
+            {'$set': {'primary_image': image_path}},
         )
-        print(filename)  # Changed to filename for logging
+        print(image_path)
         if update_result.modified_count > 0:
             return JsonResponse({'status': 'success'})
         else:
             return JsonResponse({'status': 'not_modified'}, status=400)
 
     return JsonResponse({'status': 'fail'}, status=400)
+
+from django.http import JsonResponse
 
 def my_cards(request):
     mongo_collection = mongo_handler()
