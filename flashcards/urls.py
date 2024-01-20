@@ -19,4 +19,5 @@ urlpatterns = [
 	path('log_correct_click', views.log_correct_click, name='log_correct_click'),
 	path('generate_ai_images/', generate_ai_images, name='generate_ai_images'),
 	path('generate_bulk_ai_images/', views.generate_bulk_ai_images, name='generate_bulk_ai_images'),
+	path('image-generation-test/', views.image_generation_test, name='image_generation_test'),
 ]
