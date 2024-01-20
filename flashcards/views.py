@@ -840,4 +840,23 @@ def check_and_generate_images():
         else:
             print(f"Card missing 'word': ID {card['_id']} in deck {card['deck']}")
 
+def image_generation_test(request):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        url = "https://api.edenai.run/v2/image/generation"
+        payload = {
+            "providers": "openai",
+            "text": text,
+            "resolution": "512x512",
+            "fallback_providers": ""
+        }
+        headers = {"Authorization": f"Bearer {settings.EDEN_AI_API_KEY}"}
+        
+        response = requests.post(url, json=payload, headers=headers)
+        result = json.loads(response.text)
+
+        # Pass the result to the template
+        return render(request, 'image_generation_result.html', {'result': result})
+
+    return render(request, 'image_generation_test.html')
 

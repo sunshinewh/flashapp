@@ -191,3 +191,4 @@ Q_CLUSTER = {
     'redis': os.getenv('REDIS_URL')  # Use Redis URL from the environment variable
 }
 
+EDEN_AI_API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2VhNGJiYzMtODdhMC00NjFlLWE2MzAtNzAyZWYzMmZiNjgxIiwidHlwZSI6ImFwaV90b2tlbiJ9.lMe4eAHqdIn0PFJSBfQV9ZDpEK6YM1vuotN4Wjf2QIM'

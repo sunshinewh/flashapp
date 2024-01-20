@@ -1,0 +1,23 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Generation Result</title>
+</head>
+<body>
+    <h1>Generated Image</h1>
+    {% if result %}
+        <!-- Display the result here. Modify according to your API response structure -->
+        <img src="{{ result['openai']['items'][0]['image_url'] }}" alt="Generated Image">
+    {% else %}
+        <p>No image generated.</p>
+    {% endif %}
+    <a href="{% url 'image_generation_test' %}">Try again</a>
+</body>
+</html>
+{% endblock %}

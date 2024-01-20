@@ -1,0 +1,21 @@
+{% extends 'general/base.html' %}
+
+{% load static %}
+
+{% block body %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Generation Test</title>
+</head>
+<body>
+    <h1>Test Image Generation</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="text-input">Enter Text:</label>
+        <input type="text" id="text-input" name="text" required>
+        <button type="submit">Generate Image</button>
+    </form>
+</body>
+</html>
+{% endblock %}
