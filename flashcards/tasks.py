@@ -100,7 +100,7 @@ AWS_STORAGE_BUCKET_NAME="flashappbucket"
 def print_to_stderr(*a):
     print(*a, file=sys.stderr)
     
-
+@shared_task
 def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim):
     print(f"Sampler: {sampler}")
     filenames = []  # Initialize image_paths as an empty list

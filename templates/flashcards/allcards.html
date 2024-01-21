@@ -236,8 +236,23 @@
         margin-top: 10px;
     }
 </style>
-
 <script>
+    // Function to poll the task status
+    function checkTaskStatus(taskId) {
+        fetch(`/task-status/${taskId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'complete') {
+                    console.log('Task complete, filenames:', data.filenames);
+                    // Process the filenames
+                } else {
+                    console.log('Task still pending...');
+                    setTimeout(() => checkTaskStatus(taskId), 2000); // Poll every 2 seconds
+                }
+            });
+    }
+
+    // Function to set the primary image
     function setPrimaryImage(cardId, imageUrl) {
         const urlParts = imageUrl.split('/');
         const filename = urlParts[urlParts.length - 1].split('?')[0];
@@ -263,6 +278,7 @@
             });
     }
 
+    // Function to show notifications
     function showNotification(message, type) {
         const notification = document.getElementById('notification');
         notification.innerText = message;
@@ -279,6 +295,7 @@
         setTimeout(() => { notification.style.display = 'none'; }, 3000);
     }
 
+    // Function to update image dimensions based on selection
     function updateDimensions() {
         var selectedOption = document.getElementById("dimensions").value;
         var hdim, vdim;
@@ -307,5 +324,6 @@
         console.log("Selected Dimensions: " + hdim + "x" + vdim);
     }
 </script>
+
 <div id="notification"></div>
 {% endblock %}
