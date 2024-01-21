@@ -314,10 +314,11 @@ def generate_ai_images(request):
                     buffer.seek(0)
                     # Upload the modified image back to S3
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
+                    print(f"Uploading written cards to AWS: {full_path}")
 
                     # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
-                    print(f"####################### update dict: {presigned_url} + " filename "{filename}")
+                    print(f"####################### update dict: {presigned_url} filename {path}" )
 
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
