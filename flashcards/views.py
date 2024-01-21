@@ -40,6 +40,9 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 
+def print_to_stderr(*a):
+    print(*a, file=sys.stderr)
+
 all_cards,ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa,line1 = ([] for i in range(20))
 
 def get_existing_images(s3_client, bucket_name, prefix):
@@ -184,18 +187,17 @@ def generate_image(filename_base, text_string, style_preset, numimages):
         # Check if "artifacts" is present in the response
         if "artifacts" in data:
             artifacts = data["artifacts"]
-            print("Yes Artifacts")
+            print_to_stderr("Yes Artifacts")
 
             # Check if there are artifacts to display
             if artifacts:
                 for i, artifact in enumerate(artifacts):
                     base64_image = artifact.get("base64")
-                    print(f"base64: {base64_image}")
+                    print_to_stderr(f"base64: {base64_image}")
                     # Check if "base64" is present in the artifact
                     if base64_image:
                         image_paths.append(filename)  # Append to image_paths
-                        card_files.append(filename)  # Append to image_paths
-                        print(f"filename: {filename}")
+                        print_to_stderr(f"filename: {filename}")
                         # Decode base64 image data
                         image_data = base64.b64decode(base64_image)
                         # Open the image using PIL
@@ -207,8 +209,8 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
-                        print(f"bucket: {AWS_STORAGE_BUCKET_NAME}")
-                        print(f"key: {key}")
+                        print_to_stderrf"bucket: {AWS_STORAGE_BUCKET_NAME}")
+                        print_to_stderr(f"key: {key}")
 
                         key = f"raw/{filename}"
                         buffer = io.BytesIO()
@@ -216,7 +218,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
-    return image_paths, card_files
+    return image_paths
 
 
 def home(request):
@@ -274,7 +276,7 @@ def generate_ai_images(request):
 
         try:
             # Call generate_image with filebase and text_string
-            card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
+            image_paths = generate_image(filebase, text_string, style_preset, numimages)
 
             # Initialize update_dict
             update_dict = {}
