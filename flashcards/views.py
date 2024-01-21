@@ -209,7 +209,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
-                        print_to_stderrf"bucket: {AWS_STORAGE_BUCKET_NAME}")
+                        print_to_stderrf"bucket: {AWS_STORAGE_BUCKET_NAME}"
                         print_to_stderr(f"key: {key}")
 
                         key = f"raw/{filename}"
