@@ -276,7 +276,7 @@ def generate_ai_images(request):
         try:
             # Call generate_image with filebase and text_string
             image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
-
+            print(f"######################### Image Paths: {image_paths}")
             # Initialize update_dict
             update_dict = {}
 
@@ -293,7 +293,7 @@ def generate_ai_images(request):
                 presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
 
                 if presigned_url is not None:
-                    print("Presigned URL:", presigned_url)
+                    #print("Presigned URL:", presigned_url)
 
                 # Fetch the content from the URL
                 response = requests.get(presigned_url)
@@ -316,7 +316,7 @@ def generate_ai_images(request):
                     # Upload the modified image back to S3
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
 
-                    # Update your dictionary to reflect the full path
+                    # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
