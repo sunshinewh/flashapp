@@ -43,8 +43,8 @@ import base64
 
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
-hdim = 512
-vdim = 896
+hdim = 896
+vdim = 1152
 FONTSIZE = 70
 SHADOWWIDTH = 4
 
@@ -171,8 +171,8 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                     }
                 ],
                 "cfg_scale": 7,
-                "height": 512,
-                "width": 896,
+                "height": 896,
+                "width": 1152,
                 "samples": 1,
                 "steps": 30,
                 "seed": random_number,
