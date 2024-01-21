@@ -275,8 +275,8 @@ def generate_ai_images(request):
         sentenceeng = request.POST.get('sentenceeng')
         text_string = word
         filebase = f"{deck}_{word}".replace(' ', '_')
-        hdim = request.POST.get('hdim')
-        vdim = request.POST.get('vdim')
+        #hdim = request.POST.get('hdim')
+        #vdim = request.POST.get('vdim')
 
         try:
             # Call generate_image with filebase and text_string
@@ -299,7 +299,7 @@ def generate_ai_images(request):
                 print(f"####################### aws url: {presigned_url}")
 
                 if presigned_url is not None:
-                    print("Presigned URL is not none:", presigned_url)
+                    print("#################Presigned URL is not none:", presigned_url)
 
                 # Fetch the content from the URL
                 response = requests.get(presigned_url)
@@ -307,6 +307,8 @@ def generate_ai_images(request):
                 with Image.open(BytesIO(response.content)) as card_write:
                     write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
                     write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
+                    print(f"####################### meaning: {meaning}")
+
 
                     # Save the modified image to a buffer
                     buffer = BytesIO()
@@ -314,7 +316,7 @@ def generate_ai_images(request):
                     buffer.seek(0)
                     # Upload the modified image back to S3
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
-                    print(f"Uploading written cards to AWS: {full_path}")
+                    print(f"##################Uploading written cards to AWS: {full_path}")
 
                     # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
@@ -374,8 +376,8 @@ def generate_bulk_ai_images(request):
             sentenceeng = request.POST.get('sentenceeng')
             text_string = word
             filebase = f"{deck}_{word}".replace(' ', '_')
-            hdim = request.POST.get('hdim')
-            vdim = request.POST.get('vdim')
+            #hdim = request.POST.get('hdim')
+            #vdim = request.POST.get('vdim')
             filepaths_to_check = [f"cards/{filebase}_{i}.jpg" for i in range(numimages)]
             if not all(filepath in existing_images for filepath in filepaths_to_check):
                 try:
