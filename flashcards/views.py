@@ -40,7 +40,7 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 
-ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time = ([17] for i in range(4))
+ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time = ([] for i in range(17))
 
 def get_existing_images(s3_client, bucket_name, prefix):
     try:
