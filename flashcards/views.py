@@ -56,6 +56,15 @@ def get_existing_images(s3_client, bucket_name, prefix):
         return None
 
 # Create an S3 client
+AWS_ACCESS_KEY_ID='AKIAVJ2P6UW7XPTFZ2XT'
+AWS_SECRET_ACCESS_KEY='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'
+AWS_STORAGE_BUCKET_NAME="flashappbucket"
+AWS_S3_REGION_NAME='us-west-2'
+
+STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
+api_host = 'https://api.stability.ai'
+api_key = STABILITY_API_KEY
+engine_id = "stable-diffusion-v1-6"
 
 s3client = boto3.client(
     's3',
