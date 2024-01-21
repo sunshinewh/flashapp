@@ -190,5 +190,12 @@ Q_CLUSTER = {
     'orm': 'default',
     'redis': os.getenv('REDIS_URL')  # Use Redis URL from the environment variable
 }
+pgENGINE='django.db.backends.postgresql'
+pgNAME='dephaguq2mn933'
+pgUSER='srkixmzithrred'
+pgPASSWORD='66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29'
+pgHOST='ec2-54-234-13-16.compute-1.amazonaws.com'
+pgPORT='5432'
+api_host = 'https://api.stability.ai'
 
 EDEN_AI_API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2VhNGJiYzMtODdhMC00NjFlLWE2MzAtNzAyZWYzMmZiNjgxIiwidHlwZSI6ImFwaV90b2tlbiJ9.lMe4eAHqdIn0PFJSBfQV9ZDpEK6YM1vuotN4Wjf2QIM'

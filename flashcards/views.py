@@ -57,14 +57,6 @@ def get_existing_images(s3_client, bucket_name, prefix):
 
 # Create an S3 client
 STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
-api_host = 'https://api.stability.ai'
-
-SECRET_KEY='o8a))*u-$1+d(cry@qt)4nyabv*!ucflu#%v0%intv1uh*%qsu'
-STRIPE_PUBLIC_KEY_TEST='pk_test_12345...'
-STRIPE_SECRET_KEY_TEST='sk_test_12345...'
-STRIPE_WEBHOOK_SECRET_TEST='whsec_12345..'
-PRODUCT_PRICE='price_12345...'
-
 MONGO_USER='user'
 MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
 MONGO_HOST='cluster0.sirwuvv.mongodb.net'
@@ -76,14 +68,6 @@ AWS_SECRET_ACCESS_KEY='bH/ZAV6vxmaPSoWuq+J/ificmHFz9NPeC4+EurGb'
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 AWS_S3_REGION_NAME='us-west-2'
 
-pgENGINE='django.db.backends.postgresql'
-pgNAME='dephaguq2mn933'
-pgUSER='srkixmzithrred'
-pgPASSWORD='66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29'
-pgHOST='ec2-54-234-13-16.compute-1.amazonaws.com'
-pgPORT='5432'
-
-pgENGINE=django.db.backends.postgresql
 
 
 s3client = boto3.client(
