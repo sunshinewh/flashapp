@@ -131,14 +131,7 @@ stability_api = client.StabilityInference(
 )
 
 def generate_image(filename_base, text_string, style_preset, numimages):
-    print(f"Generated filename_base: {filename_base}")  # Debugging line
-    print(f"text_string: {text_string}")  # Debugging line
-    static_path = []
     image_paths = []  # Initialize image_paths as an empty list
-    ai_paths = []
-    seednums = [] 
-    ai_path = []
-    cards_path = []
     card_files = []
     
     # Initialize the Stability client if not already initialized
@@ -278,7 +271,7 @@ def generate_ai_images(request):
 
                 #with Image.open(BytesIO(file_content)) as card_write:
                     # Perform your image modifications
-                    write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                    write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
                     write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
 
                     # Save the modified image to a buffer
@@ -365,7 +358,7 @@ def generate_bulk_ai_images(request):
                         with Image.open(BytesIO(file_content)) as card_write:
                             # Perform your image modifications
                             # [Assuming write_image function is defined elsewhere]
-                            write_image((hdim, vdim), meaning + " [" + full_ipa + "]", font, 'black', line2, card_write)
+                            write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
                             write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
 
                             # Save the modified image to a buffer
@@ -603,12 +596,12 @@ def deck(request, deck_name=None):
             line3 = 225
             # Write text to front image
             write_image((vdim, hdim), new_row['word'], font, 'black', line1, front_img)
-            write_image((vdim, hdim), new_row['approximation'] + " [" + new_row['p_ipa'] + "]", font, 'black', line2, front_img)
+            write_image((vdim, hdim), " [" + new_row['p_ipa'] + "] " + new_row['approximation'] , font, 'black', line2, front_img)
             write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
             # Write text to back image        
-            write_image((vdim, hdim), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', line2, back_img)
-            write_image((vdim, hdim), new_row['sentenceforeign'], font, 'black', line3, back_img)
+            write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
+            write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
             
             # Save images and construct relative paths
             audio_filename = f"{image_filename}.mp3"
