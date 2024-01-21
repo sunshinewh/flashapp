@@ -130,6 +130,14 @@ STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
 STABILITY_HOST = "grpc.stability.ai:443"
 
 def generate_image(filename_base, text_string, style_preset, numimages):
+    static_path = []
+    image_paths = []  # Initialize image_paths as an empty list
+    ai_paths = []
+    seednums = []
+    ai_path = []
+    cards_path = []
+    card_files = []
+
     image_paths = []  # Initialize image_paths as an empty list
     card_files = []
     
@@ -167,21 +175,6 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                 "style_preset": style_preset,
             },
         )
-
-        print("API Request Payload:", json.dumps({
-            "text_prompts": [
-                {
-                    "text": text_string,
-                }
-            ],
-            "cfg_scale": 7,
-            "height": 832,
-            "width": 1152,
-            "samples": 1,
-            "steps": 30,
-            "seed": random_number,
-            "style_preset": style_preset,
-        }, indent=4))
 
         if response.status_code != 200:
             raise Exception("Non-200 response: " + str(response.text))
