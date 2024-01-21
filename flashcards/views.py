@@ -39,6 +39,7 @@ from django_q.tasks import async_task
 import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
+import base64
 
 def print_to_stderr(*a):
     print(*a, file=sys.stderr)
@@ -132,20 +133,24 @@ def write_image(size, message, font, fontColor, hoffset, image):
 STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
 STABILITY_HOST = "grpc.stability.ai:443"
 
-def generate_image(filename_base, text_string, style_preset, numimages):
-    static_path = []
-    image_paths = []  # Initialize image_paths as an empty list
-    ai_paths = []
-    seednums = []
-    ai_path = []
-    cards_path = []
-    card_files = []
+AWS_ACCESS_KEY_ID = 'your_access_key_id'
+AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
+AWS_STORAGE_BUCKET_NAME = "flashappbucket"
+AWS_S3_REGION_NAME = 'us-west-2'
 
+STABILITY_API_KEY = "your_stability_api_key"
+api_host = 'https://api.stability.ai'
+engine_id = "stable-diffusion-v1-6"
+
+s3client = boto3.client(
+    's3',
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_S3_REGION_NAME
+)
+
+def generate_image(filename_base, text_string, style_preset, numimages):
     image_paths = []  # Initialize image_paths as an empty list
-    card_files = []
-    
-    engine_id = "stable-diffusion-v1-6"
-    api_host = 'https://api.stability.ai'
 
     if STABILITY_API_KEY is None:
         raise Exception("Missing Stability API key.")
@@ -178,7 +183,6 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                 "style_preset": style_preset,
             },
         )
-
         if response.status_code != 200:
             raise Exception("Non-200 response: " + str(response.text))
 
@@ -214,6 +218,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
     return image_paths
+
 
 
 def home(request):
