@@ -129,18 +129,6 @@ def write_image(size, message, font, fontColor, hoffset, image):
     #draw.text((((W-w)/2), ((H-h)/2)+125), TRADITIONAL_CHAR, font=font, fill=fontColor, stroke_width=10, stroke_fill='white')
     return image
 
-# Set your Stability API Key and host
-STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
-STABILITY_HOST = "grpc.stability.ai:443"
-
-AWS_ACCESS_KEY_ID = 'your_access_key_id'
-AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
-AWS_STORAGE_BUCKET_NAME = "flashappbucket"
-AWS_S3_REGION_NAME = 'us-west-2'
-
-api_host = 'https://api.stability.ai'
-engine_id = "stable-diffusion-v1-6"
-
 s3client = boto3.client(
     's3',
     aws_access_key_id=AWS_ACCESS_KEY_ID,
