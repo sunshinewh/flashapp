@@ -138,7 +138,7 @@ s3client = boto3.client(
 
 def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim):
     print(f"Sampler: {sampler}")
-    image_paths = []  # Initialize image_paths as an empty list
+    filenames = []  # Initialize image_paths as an empty list
 
     if STABILITY_API_KEY is None:
         raise Exception("Missing Stability API key.")
@@ -212,7 +212,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
-    return image_paths
+    return filenames
 
 
 
@@ -278,25 +278,26 @@ def generate_ai_images(request):
 
         try:
             # Call generate_image with filebase and text_string
-            image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
-            print(f"######################### Image Paths: {image_paths}")
+            filenames = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
+            print(f"######################### Image Paths: {filenames}")
             # Initialize update_dict
             update_dict = {}
 
             # Update dictionary with new image paths
-            for i, path in enumerate(image_paths):
-                print(f"image_paths: {image_paths}")
-                print(f"path: {path}")
+            for i, path in enumerate(filenames):
+                print(f"##################### filenames: {filenames}")
+                print(f"##################### path: {path}")
                 # Ensure the path includes the 'cards/' prefix
                 full_path = f"cards/{path}"
-                print(f"fullpath: {full_path}")
+                print(f"####################### fullpath: {full_path}")
 
                 # Retrieve the image from S3
                 # Usage example
                 presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
+                print(f"####################### aws url: {presigned_url}")
 
                 if presigned_url is not None:
-                    print("Presigned URL:", presigned_url)
+                    print("Presigned URL is not none:", presigned_url)
 
                 # Fetch the content from the URL
                 response = requests.get(presigned_url)
@@ -309,7 +310,6 @@ def generate_ai_images(request):
                     buffer = BytesIO()
                     card_write.save(buffer, 'JPEG')
                     buffer.seek(0)
-
                     # Upload the modified image back to S3
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
 
@@ -377,14 +377,14 @@ def generate_bulk_ai_images(request):
                 try:
                     # Call generate_image with filebase and text_string
                     # [Assuming generate_image and other necessary functions are defined elsewhere]
-                    image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
+                    filenames = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
 
                     # Initialize update_dict
                     update_dict = {}
 
                     # Update dictionary with new image paths
-                    for i, path in enumerate(image_paths):
-                        print(f"image_paths: {image_paths}")
+                    for i, path in enumerate(filenames):
+                        print(f"filenames: {filenames}")
                         print(f"path: {path}")
                         full_path = f"cards/{path}"
 
@@ -516,7 +516,7 @@ def my_cards(request):
         card['id'] = str(card['_id'])
         card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
         card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
-        card['image_paths'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')]
+        card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')]
         cards.append(card)
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
