@@ -76,7 +76,7 @@ AWS_SECRET_ACCESS_KEY='bH/ZAV6vxmaPSoWuq+J/ificmHFz9NPeC4+EurGb'
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 AWS_S3_REGION_NAME='us-west-2'
 
-pgENGINE=django.db.backends.postgresql
+pgENGINE='django.db.backends.postgresql'
 pgNAME='dephaguq2mn933'
 pgUSER='srkixmzithrred'
 pgPASSWORD='66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29'
