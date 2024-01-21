@@ -583,6 +583,7 @@ def deck(request, deck_name=None):
             front_fonts = [regular_font, ipa_font, regular_font]
             back_texts = [new_row['meaning']+ " [" + new_row['full_ipa'] + "]", new_row['sentenceforeign']]
             back_fonts = [regular_font, ipa_font, regular_font]
+
             
             #line1 = -225
             #line2 =  -75
@@ -593,12 +594,12 @@ def deck(request, deck_name=None):
             line3 = 225
             # Write text to front image
             write_image((vdim, hdim), new_row['word'], font, 'black', line1, front_img)
-            write_image((vdim, hdim), " [" + new_row['p_ipa'] + "] " + new_row['approximation'] , font, 'black', line2, front_img)
+            write_image((vdim, hdim), new_row['approximation'] + " [" + new_row['p_ipa'] + "]", font, 'black', line2, front_img)
             write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
-            # Write text to back image        
-            write_image((hdim, vdim), "[" + new_row['full_ipa'] + "] " + new_row['meaning'] , font, 'black', line2, card_write)
-            write_image((hdim, vdim), new_row['sentenceforeign'], font, 'black', line3, card_write)
+            # Write text to back image
+            write_image((vdim, hdim), new_row['meaning']+ " [" + new_row['full_ipa'] + "]", font, 'black', line2, back_img)
+            write_image((vdim, hdim), new_row['sentenceforeign'], font, 'black', line3, back_img)
             
             # Save images and construct relative paths
             audio_filename = f"{image_filename}.mp3"
