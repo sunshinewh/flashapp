@@ -40,7 +40,7 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 
-ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa = ([] for i in range(18))
+all_cards,ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa = ([] for i in range(19))
 
 def get_existing_images(s3_client, bucket_name, prefix):
     try:
@@ -584,7 +584,6 @@ def deck(request, deck_name=None):
             back_texts = [new_row['meaning']+ " [" + new_row['full_ipa'] + "]", new_row['sentenceforeign']]
             back_fonts = [regular_font, ipa_font, regular_font]
 
-            
             #line1 = -225
             #line2 =  -75
             #line3 = 75
