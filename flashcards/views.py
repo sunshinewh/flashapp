@@ -296,7 +296,7 @@ def generate_ai_images(request):
                 presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
 
                 if presigned_url is not None:
-                    #print("Presigned URL:", presigned_url)
+                    print("Presigned URL:", presigned_url)
 
                 # Fetch the content from the URL
                 response = requests.get(presigned_url)
