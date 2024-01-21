@@ -41,6 +41,14 @@ import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 import base64
 
+AWS_STORAGE_BUCKET_NAME="flashappbucket"
+
+hdim = 512
+vdim = 896
+FONTSIZE = 70
+SHADOWWIDTH = 4
+
+
 def print_to_stderr(*a):
     print(*a, file=sys.stderr)
 
@@ -98,12 +106,7 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     return response
 
 
-AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
-hdim = 896
-vdim = 1152
-FONTSIZE = 70
-SHADOWWIDTH = 4
 
 def play_audio(file):
     sound = pydub.AudioSegment.from_file(file, format="mp3")
@@ -168,8 +171,8 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                     }
                 ],
                 "cfg_scale": 7,
-                "height": hdim,
-                "width": vdim,
+                "height": 512,
+                "width": 896,
                 "samples": 1,
                 "steps": 30,
                 "seed": random_number,
