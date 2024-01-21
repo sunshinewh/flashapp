@@ -231,6 +231,7 @@ from django.shortcuts import redirect
 # Make sure you have the appropriate imports for other required modules and functions
 
 def generate_ai_images(request):
+    print('hello')
     hdim = 512
     vdim = 512
     FONTSIZE = 100
