@@ -579,9 +579,9 @@ def deck(request, deck_name=None):
             #back_img = Image.new('RGB', (832, 1152), 'darkblue')
 
             # Gather all texts and corresponding fonts for front and back images
-            front_texts = [new_row['word'], new_row['approximation'] + " [" + new_row['p_ipa'] + "]", new_row['sentenceeng']]
+            front_texts = [new_row['word'], + "[" + new_row['p_ipa'] + "] " + new_row['approximation'], new_row['sentenceeng']]
             front_fonts = [regular_font, ipa_font, regular_font]
-            back_texts = [new_row['meaning']+ " [" + new_row['full_ipa'] + "]", new_row['sentenceforeign']]
+            back_texts = "[" + new_row['full_ipa'] + "] " + [new_row['meaning'], new_row['sentenceforeign']]
             back_fonts = [regular_font, ipa_font, regular_font]
 
             #line1 = -225
@@ -593,7 +593,7 @@ def deck(request, deck_name=None):
             line3 = 225
             # Write text to front image
             write_image((vdim, hdim), new_row['word'], font, 'black', line1, front_img)
-            write_image((vdim, hdim), + "[" + new_row['p_ipa'] + "] " + new_row['approximation'] , font, 'black', line2, front_img)
+            write_image((vdim, hdim), "[" + new_row['p_ipa'] + "] " + new_row['approximation'] , font, 'black', line2, front_img)
             write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
             # Write text to back image
