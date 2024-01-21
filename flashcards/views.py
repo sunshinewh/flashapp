@@ -40,7 +40,7 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 
-all_cards,ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa = ([] for i in range(19))
+all_cards,ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa,line1 = ([] for i in range(20))
 
 def get_existing_images(s3_client, bucket_name, prefix):
     try:
@@ -175,8 +175,8 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                     }
                 ],
                 "cfg_scale": 7,
-                "height": 832,
-                "width": 1152,
+                "height": 512,
+                "width": 515,
                 "samples": 1,
                 "steps": 30,
                 "seed": random_number,
@@ -215,6 +215,8 @@ def generate_image(filename_base, text_string, style_preset, numimages):
 
                     # Check if "base64" is present in the artifact
                     if base64_image:
+                        image_paths.append(filename)  # Append to image_paths
+                        card_files.append(filename)  # Append to image_paths
                         # Decode base64 image data
                         image_data = base64.b64decode(base64_image)
                         # Open the image using PIL
@@ -226,12 +228,14 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+                        print(f"key: {key}")
 
                         key = f"raw/{filename}"
                         buffer = io.BytesIO()
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+                        print(f'card{}')
 
     return image_paths, card_files
 
@@ -248,8 +252,8 @@ from django.shortcuts import redirect
 # Make sure you have the appropriate imports for other required modules and functions
 
 def generate_ai_images(request):
-    hdim = 1152
-    vdim = 832
+    hdim = 512
+    vdim = 512
     FONTSIZE = 100
     SHADOWWIDTH = 5
     def get_text_dimensions(text_string, font):
