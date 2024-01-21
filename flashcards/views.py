@@ -100,7 +100,7 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
 
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
-hdim = 832
+hdim = 896
 vdim = 1152
 FONTSIZE = 70
 SHADOWWIDTH = 4
@@ -136,7 +136,7 @@ s3client = boto3.client(
     region_name=AWS_S3_REGION_NAME
 )
 
-def generate_image(filename_base, text_string, style_preset, numimages):
+def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt):
     image_paths = []  # Initialize image_paths as an empty list
 
     if STABILITY_API_KEY is None:
@@ -149,7 +149,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
         # Generate a random 8-digit number
         random_number = random.randint(10000, 99999)
         response = requests.post(
-            f"{api_host}/v1/generation/{engine_id}/text-to-image",
+            f"https://api.stability.ai/v1/generation/{engine_id}/text-to-image",
             headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
@@ -157,17 +157,23 @@ def generate_image(filename_base, text_string, style_preset, numimages):
             },
             json={
                 "text_prompts": [
-                    {
-                        "text": text_string,
-                    }
-                ],
+                {
+                    "text": positive_prompt,
+                    "weight": 1
+                }
+                {
+                    "text": negative_prompt,
+                    "weight": -1
+                }
+                ]
                 "cfg_scale": 7,
-                "height": 512,
-                "width": 512,
+                "height": hdim,
+                "width": vdim,
                 "samples": 1,
                 "steps": 30,
                 "seed": random_number,
                 "style_preset": style_preset,
+                "sampler": sampler,
             },
         )
         if response.status_code != 200:
@@ -221,8 +227,6 @@ from django.shortcuts import redirect
 
 def generate_ai_images(request):
     print('hello')
-    hdim = 512
-    vdim = 512
     FONTSIZE = 100
     SHADOWWIDTH = 5
     def get_text_dimensions(text_string, font):
@@ -250,6 +254,9 @@ def generate_ai_images(request):
         card_id = request.POST.get('card_id')
         numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
         style_preset = request.POST.get('style_preset')
+        engine_id = request.POST.get('engine_id')
+        sampler = request.POST.get('sampler')
+        clip_guidance = request.POST.get('clip_guidance')
         positive_prompt = request.POST.get('positive_prompt')
         negative_prompt = request.POST.get('negative_prompt')
         deck = request.POST.get('deck_name')
@@ -263,7 +270,7 @@ def generate_ai_images(request):
 
         try:
             # Call generate_image with filebase and text_string
-            image_paths = generate_image(filebase, text_string, style_preset, numimages)
+            image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt)
 
             # Initialize update_dict
             update_dict = {}
@@ -320,8 +327,6 @@ def generate_ai_images(request):
 # View for generating bulk AI images
 @require_POST
 def generate_bulk_ai_images(request):
-    hdim = 1152
-    vdim = 832
     FONTSIZE = 100
     SHADOWWIDTH = 5
     line1 = -75
