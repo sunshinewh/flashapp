@@ -171,7 +171,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                 ],
                 "cfg_scale": 7,
                 "height": 512,
-                "width": 515,
+                "width": 512,
                 "samples": 1,
                 "steps": 30,
                 "seed": random_number,
@@ -198,6 +198,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                     if base64_image:
                         image_paths.append(filename)  # Append to image_paths
                         print_to_stderr(f"filename: {filename}")
+                        print_to_stderr(f"Image_Paths: {image_paths}")
                         # Decode base64 image data
                         image_data = base64.b64decode(base64_image)
                         # Open the image using PIL
