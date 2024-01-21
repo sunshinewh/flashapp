@@ -121,7 +121,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
     card_files = []
     
     engine_id = "stable-diffusion-v1-6"
-    api_host = os.getenv('API_HOST', 'https://api.stability.ai')
+    api_host = 'https://api.stability.ai'
 
     if STABILITY_API_KEY is None:
         raise Exception("Missing Stability API key.")
@@ -137,7 +137,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
             headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": f"Bearer {api_key}"
+                "Authorization": f"Bearer {STABILITY_API_KEY}"
             },
             json={
                 "text_prompts": [
@@ -154,7 +154,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                 "style_preset": style_preset,
             },
         )
-        
+
         print("API Request Payload:", json.dumps({
             "text_prompts": [
                 {
