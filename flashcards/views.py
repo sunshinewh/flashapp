@@ -174,27 +174,32 @@ def generate_image(filename_base, text_string, style_preset, numimages):
             raise Exception("Non-200 response: " + str(response.text))
 
         data = response.json()
-    
-        for resp in data:
-            for artifact in resp["artifacts"]:
-                if artifact["finish_reason"] == generation.FILTER:
-                    raise ValueError("Request activated the API's safety filters and could not be processed.")
-                if artifact["type"] == generation.ARTIFACT_IMAGE:
-                    base64_image = artifact["base64"]
-                    img = Image.open(io.BytesIO(base64.b64decode(base64_image))) 
-                    image_paths.append(filename)  # Append to image_paths
-                    card_files.append(filename)  # Append to image_paths
+
+        # Check if "artifacts" is present in the response
+        if "artifacts" in data:
+            artifacts = data["artifacts"]
+
+            # Check if there are artifacts to display
+            if artifacts:
+                for i, artifact in enumerate(artifacts):
+                    base64_image = artifact.get("base64")
+
+                    # Check if "base64" is present in the artifact
+                    if base64_image:
+                        # Decode base64 image data
+                        image_data = base64.b64decode(base64_image)
+                        # Open the image using PIL
+                        buffer = Image.open(io.BytesIO(image_data))
+                        # Display the image using Pillow
 
                     AWS_STORAGE_BUCKET_NAME = "flashappbucket"
                     key = f"cards/{filename}"
-                    buffer = io.BytesIO()
                     img.save(buffer, "JPEG")
                     buffer.seek(0)
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
                     AWS_STORAGE_BUCKET_NAME = "flashappbucket"
                     key = f"raw/{filename}"
-                    buffer = io.BytesIO()
                     img.save(buffer, "JPEG")
                     buffer.seek(0)
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)

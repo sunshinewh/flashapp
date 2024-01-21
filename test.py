@@ -1,14 +1,12 @@
-
 import base64
-import os
+import io
 import requests
+from PIL import Image
 
 STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
 api_host = 'https://api.stability.ai'
 api_key = STABILITY_API_KEY
 engine_id = "stable-diffusion-v1-6"
-#api_host = os.getenv('API_HOST', 'https://api.stability.ai')
-#api_key = os.getenv("STABILITY_API_KEY")
 
 if api_key is None:
     raise Exception("Missing Stability API key.")
@@ -39,7 +37,20 @@ if response.status_code != 200:
 
 data = response.json()
 
-for i, image in enumerate(data["artifacts"]):
-    with open(f"./v1_txt2img_{i}.png", "wb") as f:
-        f.write(base64.b64decode(image["base64"]))
+# Check if "artifacts" is present in the response
+if "artifacts" in data:
+    artifacts = data["artifacts"]
 
+    # Check if there are artifacts to display
+    if artifacts:
+        for i, artifact in enumerate(artifacts):
+            base64_image = artifact.get("base64")
+
+            # Check if "base64" is present in the artifact
+            if base64_image:
+                # Decode base64 image data
+                image_data = base64.b64decode(base64_image)
+                # Open the image using PIL
+                image = Image.open(io.BytesIO(image_data))
+                # Display the image using Pillow
+                image.show()
