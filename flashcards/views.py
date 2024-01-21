@@ -322,6 +322,8 @@ def generate_ai_images(request):
                     update_dict[f'image_path{i}'] = full_path
                     print(f"####################### update dict: path ie filename {path}" )
 
+                    presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
+
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
