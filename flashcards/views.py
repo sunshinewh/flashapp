@@ -174,7 +174,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
             raise Exception("Non-200 response: " + str(response.text))
 
         data = response.json()
-
+        AWS_STORAGE_BUCKET_NAME = "flashappbucket"
         # Check if "artifacts" is present in the response
         if "artifacts" in data:
             artifacts = data["artifacts"]
@@ -189,20 +189,20 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         # Decode base64 image data
                         image_data = base64.b64decode(base64_image)
                         # Open the image using PIL
-                        buffer = Image.open(io.BytesIO(image_data))
+                        image = Image.open(io.BytesIO(image_data))
                         # Display the image using Pillow
 
-                    AWS_STORAGE_BUCKET_NAME = "flashappbucket"
-                    key = f"cards/{filename}"
-                    img.save(buffer, "JPEG")
-                    buffer.seek(0)
-                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+                        key = f"cards/{filename}"
+                        buffer = io.BytesIO()
+                        image.save(buffer, format="JPEG")
+                        buffer.seek(0)
+                        s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
-                    AWS_STORAGE_BUCKET_NAME = "flashappbucket"
-                    key = f"raw/{filename}"
-                    img.save(buffer, "JPEG")
-                    buffer.seek(0)
-                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+                        key = f"raw/{filename}"
+                        buffer = io.BytesIO()
+                        image.save(buffer, format="JPEG")
+                        buffer.seek(0)
+                        s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
     return image_paths, card_files
 
