@@ -136,7 +136,8 @@ s3client = boto3.client(
     region_name=AWS_S3_REGION_NAME
 )
 
-def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt):
+def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim):
+    print(f"Sampler: {sampler}")
     image_paths = []  # Initialize image_paths as an empty list
 
     if STABILITY_API_KEY is None:
@@ -146,7 +147,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
 
-       # Generate a random 8-digit number
+        # Generate a random 8-digit number
         random_number = random.randint(10000, 99999)
         response = requests.post(
             f"https://api.stability.ai/v1/generation/{engine_id}/text-to-image",
@@ -173,7 +174,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                 "steps": 30,
                 "seed": random_number,
                 "style_preset": style_preset,
-                "sampler": sampler,
+                #"sampler": sampler,
             },
         )
 
@@ -212,6 +213,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
     return image_paths
+
 
 
 
@@ -268,10 +270,12 @@ def generate_ai_images(request):
         sentenceeng = request.POST.get('sentenceeng')
         text_string = word
         filebase = f"{deck}_{word}".replace(' ', '_')
+        hdim = request.POST.get('hdim')
+        vdim = request.POST.get('vdim')
 
         try:
             # Call generate_image with filebase and text_string
-            image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt)
+            image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
 
             # Initialize update_dict
             update_dict = {}
@@ -351,23 +355,31 @@ def generate_bulk_ai_images(request):
 
         all_cards = mongo_collection.find({}) 
         for card in all_cards:
-            text_string = card['word']
-            card_id = str(card['_id'])
-            numimages = 2  # Default to 1 if not provided
-            deck = card['deck']
-            word = card['word']
-            meaning = card['meaning']
-            full_ipa = card['full_ipa']
-            sentenceforeign = card['sentenceforeign']
-            sentenceeng = card['sentenceeng']
-            style_preset = "Anime"
+            text_string = request.POST.get('text_string')
+            card_id = request.POST.get('card_id')
+            numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
+            style_preset = request.POST.get('style_preset')
+            engine_id = request.POST.get('engine_id')
+            sampler = request.POST.get('sampler')
+            clip_guidance = request.POST.get('clip_guidance')
+            positive_prompt = request.POST.get('positive_prompt')
+            negative_prompt = request.POST.get('negative_prompt')
+            deck = request.POST.get('deck_name')
+            word = request.POST.get('word')
+            meaning = request.POST.get('meaning')
+            full_ipa = request.POST.get('full_ipa')
+            sentenceforeign = request.POST.get('sentenceforeign')
+            sentenceeng = request.POST.get('sentenceeng')
+            text_string = word
             filebase = f"{deck}_{word}".replace(' ', '_')
+            hdim = request.POST.get('hdim')
+            vdim = request.POST.get('vdim')
             filepaths_to_check = [f"cards/{filebase}_{i}.jpg" for i in range(numimages)]
             if not all(filepath in existing_images for filepath in filepaths_to_check):
                 try:
                     # Call generate_image with filebase and text_string
                     # [Assuming generate_image and other necessary functions are defined elsewhere]
-                    card_files, image_paths = generate_image(filebase, text_string, style_preset, numimages)
+                    image_paths = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
 
                     # Initialize update_dict
                     update_dict = {}
