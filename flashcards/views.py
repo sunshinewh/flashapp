@@ -69,14 +69,6 @@ from botocore.exceptions import ClientError
 import logging
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
-    """Generate a presigned URL to share an S3 object.
-
-    :param bucket_name: string
-    :param object_name: string
-    :param expiration: Time in seconds for the presigned URL to remain valid
-    :return: Presigned URL as string. If error, returns None.
-    """
-
     try:
         response = s3client.generate_presigned_url('get_object',
                                                     Params={'Bucket': bucket_name,
@@ -162,6 +154,21 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                 "style_preset": style_preset,
             },
         )
+        
+        print("API Request Payload:", json.dumps({
+            "text_prompts": [
+                {
+                    "text": text_string,
+                }
+            ],
+            "cfg_scale": 7,
+            "height": 832,
+            "width": 1152,
+            "samples": 1,
+            "steps": 30,
+            "seed": random_number,
+            "style_preset": style_preset,
+        }, indent=4))
 
         if response.status_code != 200:
             raise Exception("Non-200 response: " + str(response.text))
@@ -578,12 +585,6 @@ def deck(request, deck_name=None):
             #front_img = Image.new('RGB', (832, 1152), 'maroon')
             #back_img = Image.new('RGB', (832, 1152), 'darkblue')
 
-            # Gather all texts and corresponding fonts for front and back images
-            #front_texts = [new_row['word'], "[" + new_row['p_ipa'] + "] " + new_row['approximation'], new_row['sentenceeng']]
-            #front_fonts = [regular_font, ipa_font, regular_font]
-            #back_texts = "[" + new_row['full_ipa'] + "] " + [new_row['meaning'], new_row['sentenceforeign']]
-            #back_fonts = [regular_font, ipa_font, regular_font]
-
             #line1 = -225
             #line2 =  -75
             #line3 = 75
@@ -597,7 +598,7 @@ def deck(request, deck_name=None):
             write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
             # Write text to back image
-            write_image((vdim, hdim), new_row['full_ipa'] + "] " + new_row['meaning']+ " [" , font, 'black', line2, back_img)
+            write_image((vdim, hdim), "[" + new_row['full_ipa'] + "] " + new_row['meaning'], font, 'black', line2, back_img)
             write_image((vdim, hdim), new_row['sentenceforeign'], font, 'black', line3, back_img)
             
             # Save images and construct relative paths
