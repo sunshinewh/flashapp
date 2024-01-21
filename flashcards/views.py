@@ -211,8 +211,10 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
+                        filenames.append(filename)
 
     return filenames
+    print(f"######################### GI Filenames: {filenames}")
 
 
 
@@ -315,12 +317,13 @@ def generate_ai_images(request):
 
                     # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
+                    print(f"####################### update dict: {presigned_url} + " filename "{filename}")
 
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
         except Exception as e:
-            print(f"Error generating images: {e}")
+            print(f"##############Error generating images: {e}")
             # Handle error (e.g., display a message to the user)
 
         return redirect('my_cards')  # Redirect back to the cards page
