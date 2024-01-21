@@ -8,67 +8,47 @@
         {% csrf_token %}
         <button type="submit" class="btn btn-primary">Generate AI Images for All Cards</button>
     </form>
-<div class="gallery">
-    {% for card in cards %}
-        <div class="card-container" id="card-{{ card.id }}">
-             <!-- Edit Card Form -->
-             <form method="post" action="{% url 'generate_ai_images' %}" class="ai-image-form">
-                {% csrf_token %}
-                <input type="hidden" name="card_id" value="{{ card.id }}">
-                <input type="hidden" name="deck_name" value="{{ card.deck }}">
-                <input type="hidden" name="meaning" value="{{ card.meaning }}">
-                <input type="hidden" name="full_ipa" value="{{ card.full_ipa }}">
-                <input type="hidden" name="word" value="{{ card.word }}">
-                <input type="hidden" name="sentenceforeign" value="{{ card.sentenceforeign }}">
-                <input type="hidden" name="sentenceeng" value="{{ card.sentenceeng }}">
-                <div class="form-group">
-                    <label># Images (1-3):</label>
-                    <input type="number" name="numimages" min="1" max="4" value="2">
-                </div>
-                <div class="form-group">
-                    <label for="engine_id">Engine:</label>
-                    <select name="engine_id" id="engine_id">
-                        <option value="stable-diffusion-xl-1024-v1-0">Stable Diffusion XL 1.0</option>
-                        <option value="stable-diffusion-v1-6">Stable Diffusion 1.6</option>
-                        <option value="stable-diffusion-xl-1024-v0-9">Stable Diffusion XL 0.9</option>
-                    </select>
-                </div>                
+    <div class="gallery">
+        {% for card in cards %}
+            <div class="card-container" id="card-{{ card.id }}">
+                <!-- Edit Card Form -->
+                <form method="post" action="{% url 'generate_ai_images' %}" class="ai-image-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="card_id" value="{{ card.id }}">
+                    <input type="hidden" name="deck_name" value="{{ card.deck }}">
+                    <input type="hidden" name="meaning" value="{{ card.meaning }}">
+                    <input type="hidden" name="full_ipa" value="{{ card.full_ipa }}">
+                    <input type="hidden" name="word" value="{{ card.word }}">
+                    <input type="hidden" name="sentenceforeign" value="{{ card.sentenceforeign }}">
+                    <input type="hidden" name="sentenceeng" value="{{ card.sentenceeng }}">
+                    <input type="hidden" id="hdim_input" name="hdim" value="">
+                    <input type="hidden" id="vdim_input" name="vdim" value="">
+                    <div class="form-group">
+                        <label># Images (1-3):</label>
+                        <input type="number" name="numimages" min="1" max="4" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="engine_id">Engine:</label>
+                        <select name="engine_id" id="engine_id">
+                            <option value="stable-diffusion-xl-1024-v1-0">Stable Diffusion XL 1.0</option>
+                            <option value="stable-diffusion-v1-6">Stable Diffusion 1.6</option>
+                            <option value="stable-diffusion-xl-1024-v0-9">Stable Diffusion XL 0.9</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="style_preset">Style Preset:</label>
                         <select name="style_preset" id="style_preset">
                             <option value="3d-model">3D Model</option>
                             <option value="analog-film">Analog Film</option>
-                            <option value="anime">Anime</option>
-                            <option value="cinematic">Cinematic</option>
-                            <option value="comic-book">Comic Book</option>
-                            <option value="digital-art">Digital Art</option>
-                            <option value="enhance">Enhance</option>
-                            <option value="fantasy-art">Fantasy Art</option>
-                            <option value="isometric">Isometric</option>
-                            <option value="line-art">Line Art</option>
-                            <option value="low-poly">Low-Poly</option>
-                            <option value="modeling-compound">Modeling Compound</option>
-                            <option value="neon-punk">Neon Punk</option>
-                            <option value="origami">Origami</option>
-                            <option value="photographic">Photographic</option>
-                            <option value="pixel-art">Pixel Art</option>
-                            <option value="tile-texture">Tile Texture</option>
+                            <!-- ... other options ... -->
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="sampler">Sampler:</label>
                         <select name="sampler" id="sampler">
-                            <option value="ddim">DDIM</option>
-                            <option value="plms">PLMS</option>
-                            <option value="k_euler">K_EULER</option>
-                            <option value="k_euler_ancestral">K_EULER_ANCESTRAL</option>
-                            <option value="k_heun">K_HEUN</option>
-                            <option value="k_dpm_2">K_DPM_2</option>
-                            <option value="k_dpm_2_ancestral">K_DPM_2_ANCESTRAL</option>
-                            <option value="k_dpmpp_2s_ancestral">K_DPMPP_2S_ANCESTRAL</option>
-                            <option value="k_lms">K_LMS</option>
-                            <option value="k_dpmpp_2m">K_DPMPP_2M</option>
-                            <option value="k_dpmpp_sde">K_DPMPP_SDE</option>
+                            <option value="DDIM">DDIM</option>
+                            <option value="PLMS">PLMS</option>
+                            <!-- ... other options ... -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -76,11 +56,7 @@
                         <select name="clip_guidance" id="clip_guidance">
                             <option value="FAST_BLUE">FAST_BLUE</option>
                             <option value="NONE">NONE</option>
-                            <option value="FAST_GREEN">FAST_GREEN</option>
-                            <option value="SIMPLE">SIMPLE</option>
-                            <option value="SLOW">SLOW</option>
-                            <option value="SLOWER">SLOWER</option>
-                            <option value="SLOWEST">SLOWEST</option>
+                            <!-- ... other options ... -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -92,56 +68,25 @@
                             <option value="sdv10">SD v1.0: 896x1152</option>
                         </select>
                     </div>
-                <div class="form-group">
-                    <label>Positive Prompt:</label>
-                    <input type="text" name="positive_prompt" value="{{ card.word }}">
-                </div>
-                <div class="form-group">
-                    <label>Negative Prompt:</label>
-                    <input type="text" name="negative_prompt" value="blurry, bad">
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">Generate AI Images</button>
-            </form>
-             <form method="post" action="{% url 'my_cards' %}" class="edit-card-form">
-                {% csrf_token %}
-                <input type="hidden" name="card_id" value="{{ card.id }}">
-                <div class="form-group">
-                    <label>Word:</label>
-                    <input type="text" name="word" value="{{ card.word }}">
-                </div>
-                <div class="form-group">
-                    <label>Approximation:</label>
-                    <input type="text" name="approximation" value="{{ card.approximation }}">
-                </div>
-                <div class="form-group">
-                    <label>Sentence (English):</label>
-                    <input type="text" name="sentenceeng" value="{{ card.sentenceeng }}">
-                </div>
-                <div class="form-group">
-                    <label>Meaning:</label>
-                    <input type="text" name="meaning" value="{{ card.meaning }}">
-                </div>
-                <div class="form-group">
-                    <label>Sentence (Foreign):</label>
-                    <input type="text" name="sentenceforeign" value="{{ card.sentenceforeign }}">
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">Update</button>
-            </form>
-
-            <div class="image-container">
-                <img src="{{ card.front_image_url }}"> <!-- Updated to use presigned URL -->
-                <img src="{{ card.back_image_url }}" onclick="setPrimaryImage('{{ card.id }}', '{{ card.back_image_url }}')"> <!-- Back image with onclick event -->
-                {% for image_path in card.image_paths %}  
-                <img src="{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
-                {% endfor %}
+                    <div class="form-group">
+                        <label>Positive Prompt:</label>
+                        <input type="text" name="positive_prompt" value="{{ card.word }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Negative Prompt:</label>
+                        <input type="text" name="negative_prompt" value="blurry, bad">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Generate AI Images</button>
+                </form>
+                <!-- ... rest of the code ... -->
             </div>
-        </div>
-    {% endfor %}
-                
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+
 <style>
         .edit-card-form button {
         width: 40%;  /* Adjusted width */
@@ -226,7 +171,6 @@
     }
 </style>
 
-
 <script>
 function setPrimaryImage(cardId, imageUrl) {
     // Extract the filename from the imageUrl
@@ -275,28 +219,35 @@ function setPrimaryImage(cardId, imageUrl) {
     }
 
     function updateDimensions() {
-            var selectedOption = document.getElementById("dimensions").value;
-            var hdim, vdim;
+    var selectedOption = document.getElementById("dimensions").value;
+    var hdim, vdim;
 
-            switch (selectedOption) {
-                case "sdxlb":
-                    hdim = 512;
-                    vdim = 896;
-                    break;
-                case "sdxlv09":
-                case "sdxlv10":
-                case "sdv10":
-                    hdim = 1152;
-                    vdim = 896;
-                    break;
-                default:
-                    // Handle the default case if needed
-                    break;
-            }
+    switch (selectedOption) {
+        case "sdxlb":
+            hdim = 512;
+            vdim = 896;
+            break;
+        case "sdxlv09":
+        case "sdxlv10":
+        case "sdv10":
+            hdim = 1152;
+            vdim = 896;
+            break;
+        default:
+            // Handle the default case if needed
+            break;
+    }
 
-            // Now you can use the hdim and vdim variables as needed
-            console.log("Selected Dimensions: " + hdim + "x" + vdim);
-        }
+    // Update hidden input fields in the form with the calculated values
+    document.getElementById("hdim_input").value = hdim;
+    document.getElementById("vdim_input").value = vdim;
+
+    // Submit the form
+    document.getElementById("your_form_id").submit();
+
+    // Now you can use the hdim and vdim variables in your view
+    console.log("Selected Dimensions: " + hdim + "x" + vdim);
+}
     </script>
     <div id="notification"></div>
     {% endblock %}
