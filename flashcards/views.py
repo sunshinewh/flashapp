@@ -46,7 +46,7 @@ AWS_STORAGE_BUCKET_NAME="flashappbucket"
 def print_to_stderr(*a):
     print(*a, file=sys.stderr)
 
-all_cards,ascent,ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa,line1 = ([] for i in range(20))
+all_cards,ascent,ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa,line1 = ([] for i in range(18))
 hdim = 896
 vdim = 1152
 FONTSIZE = 70
