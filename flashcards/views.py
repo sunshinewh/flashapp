@@ -138,7 +138,6 @@ AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
 AWS_STORAGE_BUCKET_NAME = "flashappbucket"
 AWS_S3_REGION_NAME = 'us-west-2'
 
-STABILITY_API_KEY = "your_stability_api_key"
 api_host = 'https://api.stability.ai'
 engine_id = "stable-diffusion-v1-6"
 
