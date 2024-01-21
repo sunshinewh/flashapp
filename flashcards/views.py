@@ -228,24 +228,27 @@ from bson import ObjectId
 from django.shortcuts import redirect
 # Make sure you have the appropriate imports for other required modules and functions
 
+FONTSIZE = 100
+SHADOWWIDTH = 5
+
+def get_text_dimensions(text_string, font):
+    ascent, descent = font.getmetrics()
+    width = font.getmask(text_string).getbbox()[2]
+    height = font.getmask(text_string).getbbox()[3] + descent 
+    return (width, height)
+
 def generate_ai_images(request):
     print('hello')
-    FONTSIZE = 100
-    SHADOWWIDTH = 5
-    def get_text_dimensions(text_string, font):
-        ascent, descent = font.getmetrics()
-        width = font.getmask(text_string).getbbox()[2]
-        height = font.getmask(text_string).getbbox()[3] + descent 
-        return (width, height)
-        
+
     line1 = -75
-    line2 =  75
+    line2 = 75
     line3 = 225
     mongo_collection = mongo_handler()
     FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
     regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
     font = ImageFont.truetype(FONTNAME, FONTSIZE)
     ipa_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
+
     # Load fonts
     regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
     ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
@@ -299,12 +302,6 @@ def generate_ai_images(request):
                 response = requests.get(presigned_url)
 
                 with Image.open(BytesIO(response.content)) as card_write:
-                    # Now you can use img as a normal PIL Image object
-                    #img.show()  # For example, display the image
-                    # Perform other operations with img as needed
-
-                #with Image.open(BytesIO(file_content)) as card_write:
-                    # Perform your image modifications
                     write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
                     write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
 
@@ -318,6 +315,7 @@ def generate_ai_images(request):
 
                     # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
+
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
@@ -327,7 +325,7 @@ def generate_ai_images(request):
 
         return redirect('my_cards')  # Redirect back to the cards page
 
-    return redirect('home')  # Redirect to home if not a POST request
+    return redirect('my_cards')  # Redirect to home if not a POST request
 
 # View for generating bulk AI images
 @require_POST
