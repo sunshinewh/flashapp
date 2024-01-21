@@ -123,62 +123,68 @@ def write_image(size, message, font, fontColor, hoffset, image):
 STABILITY_API_KEY = "sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi"
 STABILITY_HOST = "grpc.stability.ai:443"
 
-# Initialize the Stability client
-stability_api = client.StabilityInference(
-    key=STABILITY_API_KEY,
-    verbose=True,
-    engine="stable-diffusion-xl-1024-v1-0",
-)
-
 def generate_image(filename_base, text_string, style_preset, numimages):
     image_paths = []  # Initialize image_paths as an empty list
     card_files = []
     
-    # Initialize the Stability client if not already initialized
-    stability_api = client.StabilityInference(
-        key=STABILITY_API_KEY,
-        verbose=True,
-        engine="stable-diffusion-xl-1024-v1-0",
-    )
-    
+    engine_id = "stable-diffusion-v1-6"
+    api_host = os.getenv('API_HOST', 'https://api.stability.ai')
+
+    if STABILITY_API_KEY is None:
+        raise Exception("Missing Stability API key.")
+
     # Generate images
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
 
         # Generate a random 8-digit number
         random_number = random.randint(10000, 99999)
-       
-        # Call the API to generate the image
-        answers = stability_api.generate(
-            prompt=text_string,
-            style_preset=style_preset,
-            seed=random_number,  # Modify seed for each image for variability
-            steps=50,
-            cfg_scale=8.0,
-            width=1152,
-            height=832,
-            samples=1,  # If the API supports generating multiple images at once, set this to 4 and adjust the loop
-            sampler=generation.SAMPLER_K_DPMPP_2M
+        response = requests.post(
+            f"{api_host}/v1/generation/{engine_id}/text-to-image",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            },
+            json={
+                "text_prompts": [
+                    {
+                        "text": text_string,
+                    }
+                ],
+                "cfg_scale": 7,
+                "height": 832,
+                "width": 1152,
+                "samples": 1,
+                "steps": 30,
+                "seed": random_number,
+                "style_preset": style_preset,
+            },
         )
-        
-        # Process the response and create the image
-        for resp in answers:
-            for artifact in resp.artifacts:
-                if artifact.finish_reason == generation.FILTER:
+
+        if response.status_code != 200:
+            raise Exception("Non-200 response: " + str(response.text))
+
+        data = response.json()
+    
+        for resp in data:
+            for artifact in resp["artifacts"]:
+                if artifact["finish_reason"] == generation.FILTER:
                     raise ValueError("Request activated the API's safety filters and could not be processed.")
-                if artifact.type == generation.ARTIFACT_IMAGE:
-                    img = Image.open(io.BytesIO(artifact.binary)) 
+                if artifact["type"] == generation.ARTIFACT_IMAGE:
+                    base64_image = artifact["base64"]
+                    img = Image.open(io.BytesIO(base64.b64decode(base64_image))) 
                     image_paths.append(filename)  # Append to image_paths
                     card_files.append(filename)  # Append to image_paths
 
-                    AWS_STORAGE_BUCKET_NAME="flashappbucket"
+                    AWS_STORAGE_BUCKET_NAME = "flashappbucket"
                     key = f"cards/{filename}"
                     buffer = io.BytesIO()
                     img.save(buffer, "JPEG")
                     buffer.seek(0)
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
-                    AWS_STORAGE_BUCKET_NAME="flashappbucket"
+                    AWS_STORAGE_BUCKET_NAME = "flashappbucket"
                     key = f"raw/{filename}"
                     buffer = io.BytesIO()
                     img.save(buffer, "JPEG")
@@ -186,6 +192,7 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                     s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
     return image_paths, card_files
+
 
 def home(request):
 	return render(request, 'general/home.html')
