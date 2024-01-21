@@ -67,13 +67,13 @@ if "artifacts" in data:
                 image = Image.open(io.BytesIO(image_data))
                 # Display the image using Pillow
 
-                key = f"cards/test1.jpg"
+                key = f"cards/test4.jpg"
                 buffer = io.BytesIO()
                 image.save(buffer, format="JPEG")
                 buffer.seek(0)
                 s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
 
-                key = f"raw/test2.jpg"
+                key = f"raw/test4.jpg"
                 buffer = io.BytesIO()
                 image.save(buffer, format="JPEG")
                 buffer.seek(0)

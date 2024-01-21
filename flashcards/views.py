@@ -187,18 +187,14 @@ def generate_image(filename_base, text_string, style_preset, numimages):
         # Check if "artifacts" is present in the response
         if "artifacts" in data:
             artifacts = data["artifacts"]
-            print_to_stderr("Yes Artifacts")
 
             # Check if there are artifacts to display
             if artifacts:
                 for i, artifact in enumerate(artifacts):
                     base64_image = artifact.get("base64")
-                    print_to_stderr(f"base64: {base64_image}")
+
                     # Check if "base64" is present in the artifact
                     if base64_image:
-                        image_paths.append(filename)  # Append to image_paths
-                        print_to_stderr(f"filename: {filename}")
-                        print_to_stderr(f"Image_Paths: {image_paths}")
                         # Decode base64 image data
                         image_data = base64.b64decode(base64_image)
                         # Open the image using PIL
@@ -210,8 +206,6 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
-                        print_to_stderr(f"bucket: {AWS_STORAGE_BUCKET_NAME}")
-                        print_to_stderr(f"key: {key}")
 
                         key = f"raw/{filename}"
                         buffer = io.BytesIO()
