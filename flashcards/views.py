@@ -146,7 +146,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
 
-        # Generate a random 8-digit number
+       # Generate a random 8-digit number
         random_number = random.randint(10000, 99999)
         response = requests.post(
             f"https://api.stability.ai/v1/generation/{engine_id}/text-to-image",
@@ -157,15 +157,15 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
             },
             json={
                 "text_prompts": [
-                {
-                    "text": positive_prompt,
-                    "weight": 1
-                }
-                {
-                    "text": negative_prompt,
-                    "weight": -1
-                }
-                ]
+                    {
+                        "text": positive_prompt,
+                        "weight": 1
+                    },
+                    {
+                        "text": negative_prompt,
+                        "weight": -1
+                    }
+                ],
                 "cfg_scale": 7,
                 "height": hdim,
                 "width": vdim,
@@ -176,6 +176,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
                 "sampler": sampler,
             },
         )
+
         if response.status_code != 200:
             raise Exception("Non-200 response: " + str(response.text))
 

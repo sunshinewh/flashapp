@@ -83,7 +83,15 @@
                             <option value="SLOWEST">SLOWEST</option>
                         </select>
                     </div>
-
+                    <div class="form-group">
+                        <label for="dimensions">Dimensions:</label>
+                        <select name="dimensions" id="dimensions" onchange="updateDimensions()">
+                            <option value="sdxlb">SDXL Beta: 512x896</option>
+                            <option value="sdxlv09">SDXL v0.9: 896x1152</option>
+                            <option value="sdxlv10">SDXL v1.0: 896x1152</option>
+                            <option value="sdv10">SD v1.0: 896x1152</option>
+                        </select>
+                    </div>
                 <div class="form-group">
                     <label>Positive Prompt:</label>
                     <input type="text" name="positive_prompt" value="{{ card.word }}">
@@ -265,6 +273,30 @@ function setPrimaryImage(cardId, imageUrl) {
         notification.style.display = 'block';
         setTimeout(() => { notification.style.display = 'none'; }, 3000);
     }
+
+    function updateDimensions() {
+            var selectedOption = document.getElementById("dimensions").value;
+            var hdim, vdim;
+
+            switch (selectedOption) {
+                case "sdxlb":
+                    hdim = 512;
+                    vdim = 896;
+                    break;
+                case "sdxlv09":
+                case "sdxlv10":
+                case "sdv10":
+                    hdim = 1152;
+                    vdim = 896;
+                    break;
+                default:
+                    // Handle the default case if needed
+                    break;
+            }
+
+            // Now you can use the hdim and vdim variables as needed
+            console.log("Selected Dimensions: " + hdim + "x" + vdim);
+        }
     </script>
     <div id="notification"></div>
     {% endblock %}
