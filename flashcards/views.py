@@ -320,7 +320,7 @@ def generate_ai_images(request):
 
                     # Update your dictionary to reflect filename
                     update_dict[f'image_path{i}'] = full_path
-                    print(f"####################### update dict: {presigned_url} filename {path}" )
+                    print(f"####################### update dict: path ie filename {path}" )
 
                 # Update the MongoDB document
                 mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
