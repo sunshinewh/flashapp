@@ -607,8 +607,8 @@ def deck(request, deck_name=None):
             write_image((vdim, hdim), new_row['sentenceeng'], font, 'black', line3, front_img)
 
             # Write text to back image        
-            write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
-            write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
+            write_image((hdim, vdim), "[" + new_row['full_ipa'] + "] " + new_row['meaning'] , font, 'black', line2, card_write)
+            write_image((hdim, vdim), new_row['sentenceforeign'], font, 'black', line3, card_write)
             
             # Save images and construct relative paths
             audio_filename = f"{image_filename}.mp3"
