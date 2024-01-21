@@ -40,6 +40,8 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 
+ascent, SHADOWWIDTH, regular_font, ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time = ([17] for i in range(4))
+
 def get_existing_images(s3_client, bucket_name, prefix):
     try:
         existing_images = []
@@ -101,7 +103,6 @@ def play_audio(file):
 shadow_color='white'
 
 # Second File Path - in the 'cards' subdirectory under static
-
 
 def get_text_dimensions(text_string, font):
     ascent, descent = font.getmetrics()
@@ -542,10 +543,6 @@ def deck(request, deck_name=None):
             return redirect('deck')
 
         reader = csv.DictReader(decoded_file)
-        all_cards = []
-        card_write = []
-        card_files = []
-
         # Setup paths for fonts
 
         FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
@@ -559,7 +556,6 @@ def deck(request, deck_name=None):
             width = font.getmask(text_string).getbbox()[2]
             height = font.getmask(text_string).getbbox()[3] + descent 
             return (width, height)
-            static_path = []
         # Load fonts
         regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
         #font = ImageFont.truetype(regular_font_path, FONTSIZE)
@@ -575,11 +571,6 @@ def deck(request, deck_name=None):
             new_row['reviewed'] = 0
             text_for_image = new_row.get('word', 'DefaultWord')
             image_filename = f"{deck_name}_{new_row['word']}".replace(' ', '_')
-            print(f"Word: {text_for_image}")
-            print(f"image_filename: {image_filename}")
-            print(f"Word: {text_for_image}")
-            print(f"image_filename: {image_filename}")
-            
 
             # Create front and back images
             front_img = Image.new('RGB', (vdim, hdim), 'maroon')
@@ -590,7 +581,6 @@ def deck(request, deck_name=None):
             # Gather all texts and corresponding fonts for front and back images
             front_texts = [new_row['word'], new_row['approximation'] + " [" + new_row['p_ipa'] + "]", new_row['sentenceeng']]
             front_fonts = [regular_font, ipa_font, regular_font]
-            print(f"front fonts {front_fonts}")
             back_texts = [new_row['meaning']+ " [" + new_row['full_ipa'] + "]", new_row['sentenceforeign']]
             back_fonts = [regular_font, ipa_font, regular_font]
             
