@@ -579,10 +579,10 @@ def deck(request, deck_name=None):
             #back_img = Image.new('RGB', (832, 1152), 'darkblue')
 
             # Gather all texts and corresponding fonts for front and back images
-            front_texts = [new_row['word'], "[" + new_row['p_ipa'] + "] " + new_row['approximation'], new_row['sentenceeng']]
-            front_fonts = [regular_font, ipa_font, regular_font]
-            back_texts = "[" + new_row['full_ipa'] + "] " + [new_row['meaning'], new_row['sentenceforeign']]
-            back_fonts = [regular_font, ipa_font, regular_font]
+            #front_texts = [new_row['word'], "[" + new_row['p_ipa'] + "] " + new_row['approximation'], new_row['sentenceeng']]
+            #front_fonts = [regular_font, ipa_font, regular_font]
+            #back_texts = "[" + new_row['full_ipa'] + "] " + [new_row['meaning'], new_row['sentenceforeign']]
+            #back_fonts = [regular_font, ipa_font, regular_font]
 
             #line1 = -225
             #line2 =  -75
