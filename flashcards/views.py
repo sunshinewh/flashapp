@@ -235,7 +235,6 @@ def generate_image(filename_base, text_string, style_preset, numimages):
                         image.save(buffer, format="JPEG")
                         buffer.seek(0)
                         s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, key)
-                        print(f'card{}')
 
     return image_paths, card_files
 
