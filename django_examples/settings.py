@@ -39,8 +39,9 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 DEBUG = True
 ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 
-## rabbitmq message broker for Celery
-#CELERY_BROKER_URL = 'pyamqp://127.0.0.1:5672'
+# Celery Broker
+CELERY_BROKER_URL = os.environ.get('SECRET_REDIS_URI')  # or 'RedisSecretURI' if that's the name you've set
+
 
 # Application definition
 
