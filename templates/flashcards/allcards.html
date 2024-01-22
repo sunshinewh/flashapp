@@ -12,7 +12,7 @@
         {% for card in cards %}
             <div class="card-container" id="card-{{ card.id }}">
                 <!-- Edit Card Form -->
-                <form method="post" action="{% url 'generate_ai_images' %}" class="ai-image-form" id="aiImageForm">
+                <form method="post" action="{% url 'generate_ai_images' %}" class="ai-image-form" id="startTask">
                     {% csrf_token %}
                     <input type="hidden" name="card_id" value="{{ card.id }}">
                     <input type="hidden" name="deck_name" value="{{ card.deck }}">
