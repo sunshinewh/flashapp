@@ -46,25 +46,10 @@ ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 #CELERY_RESULT_BACKEND = os.environ.get('SECRET_REDIS_URI')
 CELERY_BROKER_URL = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_NONE"   # or 'RedisSecretURI' if that's the name you've set
 CELERY_RESULT_BACKEND = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_NONE" 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('SECRET_REDIS_URI'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {
-                "ssl_cert_reqs": "CERT_REQUIRED"  # Change this line
-            },
-        }
-    }
-}
 
 #https://devcenter.heroku.com/articles/ssl-endpoint#acquire-ssl-certificate
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SSLIFY_DISABLE = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#SSLIFY_DISABLE = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -82,7 +67,7 @@ INSTALLED_APPS = [
     'django_heroku',
     'django_on_heroku',
     'django_q',
-    'sslify.middleware.SSLifyMiddleware',
+    #'sslify.middleware.SSLifyMiddleware',
 ]
 
 MIDDLEWARE = [
