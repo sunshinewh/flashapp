@@ -74,7 +74,6 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django_heroku',
     'django_on_heroku',
-    'django-redis',
     'django_q',
 ]
 
