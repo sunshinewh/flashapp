@@ -44,6 +44,8 @@ ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 # Celery Broker
 CELERY_BROKER_URL = os.environ.get('SECRET_REDIS_URI')  # or 'RedisSecretURI' if that's the name you've set
 CELERY_RESULT_BACKEND = os.environ.get('SECRET_REDIS_URI')
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 CACHES = {
     "default": {
