@@ -361,13 +361,11 @@ from django.http import JsonResponse
 
 def my_cards(request):
     mongo_collection = mongo_handler()
-    filenames={}
 
     # Handle POST request for updates
     if request.method == 'POST':
         data = request.POST
         card_id = data.get('card_id')  # Retrieve card_id from POST data
-        deck_name = data.get('deck_name')
         updated_data = {
             'word': data.get('word'),
             'approximation': data.get('approximation'),
@@ -377,7 +375,8 @@ def my_cards(request):
         }
         if card_id:
             mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': updated_data})
-            #return JsonResponse({'status': 'success', 'message': 'Card updated successfully'})
+            # JsonResponse can be used for AJAX calls
+            # return JsonResponse({'status': 'success', 'message': 'Card updated successfully'})
         else:
             # Handle the case where 'card_id' is missing
             pass
@@ -387,16 +386,14 @@ def my_cards(request):
     cards_data = mongo_collection.find({})
     cards = []
 
-for card in cards_data:
-    card['id'] = str(card['_id'])
-    card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
-    card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
-    # Check if image paths exist, if not, set to empty list
-    card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')] if any(key.startswith('image_path') for key in card) else []
-
+    for card in cards_data:
+        card['id'] = str(card['_id'])
+        card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
+        card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
+        # Check if image paths exist, if not, set to empty list
+        card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')] if any(key.startswith('image_path') for key in card) else []
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
-
 
 def my_decks(request):
     mongo_collection = mongo_handler()
