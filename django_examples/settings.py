@@ -43,6 +43,19 @@ ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 CELERY_BROKER_URL = os.environ.get('SECRET_REDIS_URI')  # or 'RedisSecretURI' if that's the name you've set
 CELERY_RESULT_BACKEND = os.environ.get('SECRET_REDIS_URI')
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get('SECRET_REDIS_URI'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "ssl_cert_reqs": None
+            },
+        }
+    }
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,6 +72,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django_heroku',
     'django_on_heroku',
+    'django-redis',
     'django_q',
 ]
 
