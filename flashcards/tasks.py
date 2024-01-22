@@ -19,7 +19,7 @@ import random
 import boto3
 from django.conf import settings
 from bson import ObjectId
-from my_config_file import STABILITY_API_KEY
+from django.conf import settings
 
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
