@@ -240,8 +240,6 @@
 <script>
     // Function to retrieve CSRF token
     function getCsrfToken() {
-        // Assuming you have a CSRF token in a cookie
-        // Adjust accordingly if your CSRF token is stored differently
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
             let [name, value] = cookie.split('=');
@@ -256,30 +254,36 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('startTask');
         if (form) {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent default form submission
-                const formData = new FormData(form);
-
-                // Make the AJAX POST request
-                fetch('/generate_ai_images/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken() // Include CSRF token
-                    },
-                    body: JSON.stringify(Object.fromEntries(formData))
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.task_id) {
-                        // Start polling with the received task_id
-                        polling = setInterval(() => checkTaskStatus(data.task_id), 2000);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            });
+            form.addEventListener('submit', startTask);
         }
     });
+
+    function startTask(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(event.target);
+        let formObject = {};
+        formData.forEach(function(value, key){
+            formObject[key] = value;
+        });
+
+        fetch('/generate_ai_images/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken() // Include CSRF token
+            },
+            body: JSON.stringify(formObject)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.task_id) {
+                // Start polling with the received task_id
+                polling = setInterval(() => checkTaskStatus(data.task_id), 2000);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 
     // Function to check task status
     function checkTaskStatus(taskId) {
@@ -287,14 +291,20 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'complete') {
-                    console.log('Task complete:', data.filenames);
                     clearInterval(polling);  // Stop the polling
-                    // Handle task completion here, e.g., update the UI
+                    handleTaskCompletion(data.filenames); // Handle the completion
                 } else {
                     console.log('Task still pending...');
                 }
             })
             .catch(error => console.error('Error:', error));
+    }
+
+    // Function to handle task completion
+    function handleTaskCompletion(filenames) {
+        // Logic to handle the completion of the task, such as updating the UI
+        console.log('Completed task with files:', filenames);
+        // Example: Update the UI with received filenames
     }
 
     // Function to update image dimensions based on selection
