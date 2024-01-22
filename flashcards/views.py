@@ -172,7 +172,7 @@ from django.shortcuts import redirect
 def generate_ai_images(request):
     if request.method == 'POST':
         # Extract the necessary data from the request
-        filename_base = request.POST.get('filename_base')
+        filename_base = f"{deck}_{word}".replace(' ', '_')
         style_preset = request.POST.get('style_preset')
         numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
         engine_id = request.POST.get('engine_id')
@@ -188,11 +188,9 @@ def generate_ai_images(request):
         clip_guidance = request.POST.get('clip_guidance')
         deck = request.POST.get('deck_name')
         word = request.POST.get('word')
-        
-       
-        
         sentenceeng = request.POST.get('sentenceeng')
-
+        text_string = request.POST.get('text_string')
+        print("POST Data:", request.POST)
         # Call the Celery task
         task_result = generate_image.delay(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa, card_id, clip_guidance, deck, word)
 
