@@ -110,9 +110,6 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
 
     return response
 
-
-
-
 def play_audio(file):
     sound = pydub.AudioSegment.from_file(file, format="mp3")
     playback.play(sound)
@@ -247,103 +244,43 @@ def get_text_dimensions(text_string, font):
     height = font.getmask(text_string).getbbox()[3] + descent 
     return (width, height)
 
+from django.http import JsonResponse
+from .tasks import generate_image
+from django.shortcuts import redirect
+
 def generate_ai_images(request):
-    print('hello')
-
-    line1 = -75
-    line2 = 75
-    line3 = 225
-    mongo_collection = mongo_handler()
-    FONTNAME = regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
-    regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
-    font = ImageFont.truetype(FONTNAME, FONTSIZE)
-    ipa_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New Roman Bold.ttf')
-
-    # Load fonts
-    regular_font = ImageFont.truetype(regular_font_path, FONTSIZE)
-    ipa_font = ImageFont.truetype(ipa_font_path, FONTSIZE)
-    font = ImageFont.truetype(regular_font_path, FONTSIZE)
-    line_spacing = 300  # Additional space between lines, adjust as needed
-
     if request.method == 'POST':
-        text_string = request.POST.get('text_string')
-        card_id = request.POST.get('card_id')
-        numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
+        # Extract the necessary data from the request
+        filename_base = request.POST.get('filename_base')
         style_preset = request.POST.get('style_preset')
+        numimages = int(request.POST.get('numimages', 1))  # Default to 1 if not provided
         engine_id = request.POST.get('engine_id')
         sampler = request.POST.get('sampler')
-        clip_guidance = request.POST.get('clip_guidance')
         positive_prompt = request.POST.get('positive_prompt')
         negative_prompt = request.POST.get('negative_prompt')
-        deck = request.POST.get('deck_name')
-        word = request.POST.get('word')
+        vdim = int(request.POST.get('vdim', 896))  # Provide default value if not set
+        hdim = int(request.POST.get('hdim', 1152))  # Provide default value if not set
+        sentenceforeign = request.POST.get('sentenceforeign')
         meaning = request.POST.get('meaning')
         full_ipa = request.POST.get('full_ipa')
-        sentenceforeign = request.POST.get('sentenceforeign')
+        card_id = request.POST.get('card_id')
+        clip_guidance = request.POST.get('clip_guidance')
+        deck = request.POST.get('deck_name')
+        word = request.POST.get('word')
+        
+       
+        
         sentenceeng = request.POST.get('sentenceeng')
-        text_string = word
-        filebase = f"{deck}_{word}".replace(' ', '_')
-        #hdim = request.POST.get('hdim')
-        #vdim = request.POST.get('vdim')
 
-        try:
-            from .tasks import generate_image
-            # Call generate_image with filebase and text_string
-            task_result = generate_image.delay(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
-            task_id = task_result.id
-            print(f"######################### Image Paths: {filenames}")
-            # Initialize update_dict
-            update_dict = {}
+        # Call the Celery task
+        task_result = generate_image.delay(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa, card_id, clip_guidance, deck, word)
 
-            # Update dictionary with new image paths
-            for i, path in enumerate(filenames):
-                print(f"##################### filenames: {filenames}")
-                print(f"##################### path: {path}")
-                # Ensure the path includes the 'cards/' prefix
-                full_path = f"cards/{path}"
-                print(f"####################### fullpath: {full_path}")
+        # Return a response with the task ID
+        return JsonResponse({'task_id': task_result.id})
 
-                # Retrieve the image from S3
-                # Usage example
-                presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
-                print(f"####################### aws url: {presigned_url}")
-
-                if presigned_url is not None:
-                    print("#################Presigned URL is not none:", presigned_url)
-
-                # Fetch the content from the URL
-                response = requests.get(presigned_url)
-
-                with Image.open(BytesIO(response.content)) as card_write:
-                    write_image((hdim, vdim), "[" + full_ipa + "] " + meaning , font, 'black', line2, card_write)
-                    write_image((hdim, vdim), sentenceforeign, font, 'black', line3, card_write)
-                    print(f"####################### meaning: {meaning}")
-
-
-                    # Save the modified image to a buffer
-                    buffer = BytesIO()
-                    card_write.save(buffer, 'JPEG')
-                    buffer.seek(0)
-                    # Upload the modified image back to S3
-                    s3client.upload_fileobj(buffer, AWS_STORAGE_BUCKET_NAME, full_path)
-                    print(f"##################Uploading written cards to AWS: {full_path}")
-
-                    # Update your dictionary to reflect filename
-                    update_dict[f'image_path{i}'] = full_path
-                    print(f"####################### update dict: path ie filename {path}" )
-
-                    presigned_url = create_presigned_url(AWS_STORAGE_BUCKET_NAME, full_path)
-
-                # Update the MongoDB document
-                mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
-
-        except Exception as e:
-            print(f"##############Error generating images: {e}")
-            # Handle error (e.g., display a message to the user)
-
-        return redirect('my_cards')  # Redirect back to the cards page
-
-    return redirect('my_cards')  # Redirect to home if not a POST request
+    else:
+        # Redirect if not a POST request or handle differently
+        return redirect('my_cards')  # Replace 'some_view_name' with an appropriate redirect
 
 # View for generating bulk AI images
 @require_POST

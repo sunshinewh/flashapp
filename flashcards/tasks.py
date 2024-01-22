@@ -71,7 +71,7 @@ def write_image(size, message, font, fontColor, hoffset, image):
     return image
 
 @shared_task
-def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa):
+def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa, card_id, clip_guidance, deck, word):
     filenames = []
     update_dict = {}
     mongo_collection = mongo_handler()  # Assuming mongo_handler is defined to get the collection
