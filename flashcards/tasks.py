@@ -86,6 +86,8 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
 
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
+        print(f"################filename: {filename}")
+        print(f"################filename_base: {filename_base}")
         random_number = random.randint(10000, 99999)
         response = requests.post(
             f"https://api.stability.ai/v1/generation/{engine_id}/text-to-image",
@@ -142,7 +144,7 @@ def generate_image(filename_base, style_preset, numimages, engine_id, sampler, p
 
                         # Update dictionary to reflect filename
                         update_dict[f'image_path{i}'] = filename
-
+                        print(f"################ update dict to filename: {filename}")
                         # Update MongoDB document
                         mongo_collection.update_one({'_id': ObjectId(card_id)}, {'$set': update_dict})
 
