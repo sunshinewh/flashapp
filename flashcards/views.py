@@ -40,7 +40,15 @@ import boto3
 import requests
 from botocore.exceptions import NoCredentialsError, ClientError
 import base64
-
+from django.http import JsonResponse
+from celery.result import AsyncResult
+def get_task_status(request, task_id):
+    task_result = AsyncResult(task_id)
+    if task_result.ready():
+        return JsonResponse({'status': 'complete', 'filenames': task_result.get()})
+    else:
+        return JsonResponse({'status': 'pending'})
+    
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
 def print_to_stderr(*a):
@@ -279,8 +287,10 @@ def generate_ai_images(request):
         #vdim = request.POST.get('vdim')
 
         try:
+            from .tasks import generate_image
             # Call generate_image with filebase and text_string
-            filenames = generate_image(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
+            task_result = generate_image.delay(filebase, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim)
+            task_id = task_result.id
             print(f"######################### Image Paths: {filenames}")
             # Initialize update_dict
             update_dict = {}
