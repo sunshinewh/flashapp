@@ -3,7 +3,8 @@
 # tasks.py in your Django app
 from .utils import mongo_handler
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST, csrf_exempt
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 import sys
 import base64

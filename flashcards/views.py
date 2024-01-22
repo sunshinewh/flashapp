@@ -413,7 +413,6 @@ def set_primary_image(card_id, new_image_path):
 #from your_app_name.mongo_utils import mongo_handler
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
 from bson import ObjectId
 # Assuming mongo_handler is defined elsewhere
