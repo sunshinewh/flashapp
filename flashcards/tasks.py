@@ -9,7 +9,7 @@ import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 import sys
 import base64
 import logging
-
+import os   
 from celery import shared_task
 import requests
 from PIL import Image, ImageDraw, ImageFont
