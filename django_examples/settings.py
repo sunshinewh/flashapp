@@ -44,8 +44,8 @@ ALLOWED_HOSTS = ['https://flashapp-259af069f939.herokuapp.com/', '127.0.0.1']
 # Celery Broker
 #CELERY_BROKER_URL = os.environ.get('SECRET_REDIS_URI')  # or 'RedisSecretURI' if that's the name you've set
 #CELERY_RESULT_BACKEND = os.environ.get('SECRET_REDIS_URI')
-CELERY_BROKER_URL = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_NONE"   # or 'RedisSecretURI' if that's the name you've set
-CELERY_RESULT_BACKEND = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_NONE" 
+CELERY_BROKER_URL = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_REQUIRED"   # or 'RedisSecretURI' if that's the name you've set
+CELERY_RESULT_BACKEND = "rediss://:pfd170e964fe8105dde2fd0fac039559bf91d01b6fdc2f7163485e8289e7a4e06@ec2-3-226-149-176.compute-1.amazonaws.com:16440?ssl_cert_reqs=CERT_REQUIRED" 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 

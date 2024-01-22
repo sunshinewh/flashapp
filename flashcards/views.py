@@ -42,6 +42,7 @@ from botocore.exceptions import NoCredentialsError, ClientError
 import base64
 from django.http import JsonResponse
 from celery.result import AsyncResult
+
 def get_task_status(request, task_id):
     task_result = AsyncResult(task_id)
     if task_result.ready():
