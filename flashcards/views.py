@@ -391,6 +391,7 @@ def my_cards(request):
         card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
         card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
         card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')]
+        print(f"################filename: {filenames}")
         cards.append(card)
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
