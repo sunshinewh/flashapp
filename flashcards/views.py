@@ -361,6 +361,7 @@ from django.http import JsonResponse
 
 def my_cards(request):
     mongo_collection = mongo_handler()
+    filenames={}
 
     # Handle POST request for updates
     if request.method == 'POST':

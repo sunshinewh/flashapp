@@ -132,10 +132,11 @@
             <div class="image-container">
                 <img src="{{ card.front_image_url }}"> <!-- Updated to use presigned URL -->
                 <img src="{{ card.back_image_url }}" onclick="setPrimaryImage('{{ card.id }}', '{{ card.back_image_url }}')"> <!-- Back image with onclick event -->
-                {% for image_path in card.filenames %}  
-                <img src="cards/{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')"> <!-- Updated to use presigned URL -->
-                {% endfor %}
-            </div>
+                {% if card.filenames %}
+                    {% for image_path in card.filenames %}  
+                        <img src="cards/{{ image_path }}" onclick="setPrimaryImage('{{ card.id }}', '{{ image_path }}')">
+                    {% endfor %}
+                {% endif %}
         </div>
     {% endfor %}
                 
