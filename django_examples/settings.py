@@ -78,7 +78,6 @@ INSTALLED_APPS = [
     'django_heroku',
     'django_on_heroku',
     'django_q',
-    'django_redis.cache.RedisCache',
 ]
 
 MIDDLEWARE = [
