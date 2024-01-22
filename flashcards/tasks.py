@@ -26,6 +26,7 @@ def print_to_stderr(*a):
     print(*a, file=sys.stderr)
 
 all_cards,ascent,ipa_font, line_spacing, positive_prompt, negative_prompt, sentenceeng, card_files, ext, front_texts, back_texts, front_fonts, back_fonts, audio_filename, s3client, current_time,full_ipa,line1 = ([] for i in range(18))
+
 hdim = 1152
 vdim = 896
 line1 = -75
@@ -82,8 +83,9 @@ def get_text_dimensions(text_string, font):
 def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa, card_id, clip_guidance, deck, word):
     filenames = []
     update_dict = {}
-    mongo_collection = mongo_handler()  # Assuming mongo_handler is defined to get the collection
-
+    mongo_collection = mongo_handler()  # Assuming mongo_handler is defined to get the collecti
+    positive_prompt = "orange tree with fairies"
+    negative_prompt = "bad hands"
     for i in range(numimages):
         filename = f"{filename_base}_{i}.jpg"
         print(f"################filename: {filename}")

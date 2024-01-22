@@ -62,7 +62,9 @@ CACHES = {
     }
 }
 
-
+#https://devcenter.heroku.com/articles/ssl-endpoint#acquire-ssl-certificate
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SSLIFY_DISABLE = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -80,6 +82,7 @@ INSTALLED_APPS = [
     'django_heroku',
     'django_on_heroku',
     'django_q',
+    'sslify.middleware.SSLifyMiddleware',
 ]
 
 MIDDLEWARE = [
