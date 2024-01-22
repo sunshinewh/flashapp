@@ -29,6 +29,8 @@ AWS_STORAGE_BUCKET_NAME=os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME=os.environ.get('AWS_S3_REGION_NAME')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
+STABILITY_API_KEY=os.environ.get('STABILITY_API_KEY')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -211,6 +213,5 @@ pgUSER='srkixmzithrred'
 pgPASSWORD='66fbf45ef8db1409e2e67b57eb78fce8787793a512369ebf5b6e45fd18cdff29'
 pgHOST='ec2-54-234-13-16.compute-1.amazonaws.com'
 pgPORT='5432'
-api_host='https://api.stability.ai'
 
 EDEN_AI_API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2VhNGJiYzMtODdhMC00NjFlLWE2MzAtNzAyZWYzMmZiNjgxIiwidHlwZSI6ImFwaV90b2tlbiJ9.lMe4eAHqdIn0PFJSBfQV9ZDpEK6YM1vuotN4Wjf2QIM'

@@ -73,7 +73,7 @@ def get_existing_images(s3_client, bucket_name, prefix):
         return None
 
 # Create an S3 client
-STABILITY_API_KEY='sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi'
+#STABILITY_API_KEY='sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi'
 MONGO_USER='user'
 MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
 MONGO_HOST='cluster0.sirwuvv.mongodb.net'
