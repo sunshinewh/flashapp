@@ -386,13 +386,13 @@ def my_cards(request):
     cards_data = mongo_collection.find({})
     cards = []
 
-    for card in cards_data:
-        card['id'] = str(card['_id'])
-        card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
-        card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
-        card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')]
-        print(f"################filename: {filenames}")
-        cards.append(card)
+for card in cards_data:
+    card['id'] = str(card['_id'])
+    card['front_image_url'] = generate_presigned_url(f"cards/{card['front_image']}")
+    card['back_image_url'] = generate_presigned_url(f"cards/{card['back_image']}")
+    # Check if image paths exist, if not, set to empty list
+    card['filenames'] = [generate_presigned_url(f"{card[key]}") for key in card if key.startswith('image_path')] if any(key.startswith('image_path') for key in card) else []
+
 
     return render(request, 'flashcards/allcards.html', {'cards': cards})
 
