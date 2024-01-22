@@ -19,7 +19,6 @@ import random
 import boto3
 from django.conf import settings
 from bson import ObjectId
-from django.conf import settings
 
 AWS_STORAGE_BUCKET_NAME="flashappbucket"
 
@@ -39,7 +38,7 @@ regular_font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'Times New 
 font = ImageFont.truetype(FONTNAME, FONTSIZE)
 
 # Create an S3 client
-#STABILITY_API_KEY='sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi'
+STABILITY_API_KEY='sk-gyLG03XUnY4HWeuocSwbCXKTKRzPpVR8W2Jq1dRUXFF28JGi'
 MONGO_USER='user'
 MONGO_PASSWORD='KJLhK8rwgYKYMpcGr6v4'
 MONGO_HOST='cluster0.sirwuvv.mongodb.net'
