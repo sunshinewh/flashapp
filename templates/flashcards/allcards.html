@@ -237,20 +237,21 @@
     }
 </style>
 <script>
-    // Function to poll the task status
-    function checkTaskStatus(taskId) {
-        fetch(`/task-status/${taskId}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'complete') {
-                    console.log('Task complete, filenames:', data.filenames);
-                    // Process the filenames
-                } else {
-                    console.log('Task still pending...');
-                    setTimeout(() => checkTaskStatus(taskId), 2000); // Poll every 2 seconds
-                }
-            });
-    }
+function checkTaskStatus(taskId) {
+    fetch(`/task-status/${taskId}/`)  // URL to your Django view that checks task status
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'complete') {
+                console.log('Task complete:', data.result);
+                // Handle task completion (e.g., update the UI, display the result)
+                clearInterval(polling);  // Stop the polling
+            } else {
+                console.log('Task still pending...');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
 
     // Function to set the primary image
     function setPrimaryImage(cardId, imageUrl) {
@@ -319,7 +320,8 @@
         document.getElementById("hdim_input").value = hdim;
         document.getElementById("vdim_input").value = vdim;
 
-        document.querySelector(".ai-image-form").submit();
+        task_result = generate_image.delay(...)  # Start your Celery task
+    return JsonResponse({'task_id': task_result.id})  # Return the task ID
 
         console.log("Selected Dimensions: " + hdim + "x" + vdim);
     }
