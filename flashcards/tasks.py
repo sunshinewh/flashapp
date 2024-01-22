@@ -71,6 +71,12 @@ def write_image(size, message, font, fontColor, hoffset, image):
     draw.text((((W-tw)/2), ((H-th)/2)+hoffset), message, font=font, fill=fontColor, stroke_width=SHADOWWIDTH, stroke_fill='white')
     return image
 
+def get_text_dimensions(text_string, font):
+    ascent, descent = font.getmetrics()
+    width = font.getmask(text_string).getbbox()[2]
+    height = font.getmask(text_string).getbbox()[3] + descent 
+    return (width, height)
+
 @shared_task
 def generate_image(filename_base, style_preset, numimages, engine_id, sampler, positive_prompt, negative_prompt, vdim, hdim, sentenceforeign, meaning, full_ipa, card_id, clip_guidance, deck, word):
     filenames = []
